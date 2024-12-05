@@ -15,42 +15,21 @@ class croupier:
         self.heartsDeck = []
         self.clubsDeck = []
         self.spadesDeck = []
+        self.arrays_mini = [[] for _ in range(13)]
 
-        # Inicializar las cartas de cada tipo
+
         for i in range(1, 14):  # Del 1 al 13
             self.heartsDeck.append(card("hearts", i))
             self.diamonDeck.append(card("diamonds", i))
             self.clubsDeck.append(card("clubs", i))
             self.spadesDeck.append(card("spades", i))
 
-    def init_shuffle(self):
+    def init_deck(self):
+        self.deck = []  # Asegúrate de que 'deck' está vacío.
         types = [self.heartsDeck, self.diamonDeck, self.clubsDeck, self.spadesDeck]
-        random.shuffle(types)  # Mezclar los tipos de mazos para mayor aleatoriedad
-
-        self.deck = []
-        counter = 0
-
-        while counter < 52:
-            # Seleccionar un tipo de mazo aleatorio
-            current_type = random.choice(types)
-
-            # Determinar cuántas cartas sacar del mazo (máximo restante y máximo 4)
-            max_cards = min(len(current_type), 4, 52 - counter)
-            
-            # Validar si hay cartas disponibles en este mazo
-            if max_cards <= 0:
-                continue  # Pasar al siguiente mazo si este está vacío
-
-            cant = random.randint(1, max_cards)
-
-            # Mover las cartas seleccionadas al mazo general
-            for _ in range(cant):
-                self.deck.append(current_type.pop())
-
-            counter += cant
-
-        # Mezclar la baraja general al final
-        random.shuffle(self.deck)
+        for deck_type in types:
+            self.deck.extend(deck_type)
+        self.shuffle()
 
     def shuffle(self):
         if not self.deck:
@@ -80,20 +59,32 @@ class croupier:
                         if second_half:  
                             self.deck.append(second_half.pop(0))
 
+    def posicionate(self):
+        counter = 0
+        for i in range(len(self.deck)):
+            self.arrays_mini[counter].append(self.deck[i])
+            counter += 1
+            if counter == 13:
+                counter = 0
+
+    def card_game(self):
+        
+        pass
+
+    def imprimir_grupos(self):
+        for i in range(len(self.arrays_mini)):
+            print(f"Array {i}:")
+            for card in self.arrays_mini[i]:
+                print(card.toString())
+        print("")
+        
 
 def main():
     dealer = croupier() 
-    dealer.init_shuffle()  
+    dealer.init_deck()  
 
-    print("Cartas en la baraja inicializada:")
-    for card in dealer.deck:
-        print(card.toString())
-    print("")
-    dealer.shuffle() 
+    dealer.posicionate()
 
-    print("Cartas en la baraja barajada:")
-    for card in dealer.deck:
-        print(card.toString())
-    print("")
+    dealer.card_game()
 if __name__ == "__main__":
     main()
