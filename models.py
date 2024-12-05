@@ -66,7 +66,8 @@ class croupier:
                 counter = 0 # reinicia el contador
 
     def card_game(self):
-        
+        actGroup = 13
+
         pass
 
     def imprimir_grupos(self): # Método que imprime los grupos de 4 cartas
@@ -82,11 +83,11 @@ def main():
     dealer.init_deck()  
     dealer.shuffle()
     for i in range(len(dealer.deck)):
-        print(dealer.deck[i].toString())
-    #dealer.posicionate()
-    #dealer.imprimir_grupos()
-    #dealer.posicionate()
-    #dealer.card_game()
     
 if __name__ == "__main__":
     main()
+    croupier = croupier()
+    croupier.init_deck()
+    croupier.shuffle()
+    croupier.posicionate()
+
