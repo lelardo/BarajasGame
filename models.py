@@ -66,32 +66,52 @@ class croupier:
                 counter = 0 # reinicia el contador
 
     def card_game(self):
-        card_index = 0 # se usa para saber cual es la carta que sacaremos
-        act_array = 12 # aca el 13
-        control_13 = 0 # verifica si el grupo 13 ya se completo
-        act_card = self.arrays_mini[act_array][0]
-        aux_index = act_array
-        act_array = act_card.value - 1
-        self.arrays_mini[act_array].append(self.arrays_mini[aux_index].pop(card_index))
-        act_card = self.arrays_mini[act_array][0]
-        while self.arrays_mini[act_array]:
-            aux_index = act_array
-            act_card = self.arrays_mini[act_array][0]
-            print(act_card.toString())
-            act_array = act_card.value - 1
-            card_index = len(self.arrays_mini[aux_index])-1
-            self.arrays_mini[act_array].append(self.arrays_mini[aux_index].pop(card_index))
-            
-            
-            if act_card.value == 13:
-                control_13 += 1
-            if control_13 == 4:
-                print("Fin del juego")
+        aux_end = 0  # Contador para verificar si todos los grupos están completos
+        act_array = 12  # Empezamos en el último grupo (13 - 1)
+        control = [0 for _ in range(13)]  # Control para saber cuántas cartas tiene cada grupo
+
+        while True:
+            # Verifica si ya no hay cartas en el grupo actual
+            if not self.arrays_mini[act_array]:
+                print(f"El grupo {act_array} está vacío. No hay más cartas para mover. ¡Has perdido!")
                 break
 
+            # Obtén la carta actual del grupo activo
+            act_card = self.arrays_mini[act_array].pop(0)  # Tomamos la carta de la cabeza del grupo actual
+            print(f"Carta actual: {act_card.toString()}")  # Imprime la carta que estamos jugando
+
+            # Calcula el índice del siguiente grupo
+            next_array = act_card.value - 1
+
+            # Verifica si el grupo de destino ya está lleno (4 cartas)
+            if control[next_array] == 4:
+                print(f"El grupo {next_array} ya está completo. ¡No puedes mover más cartas! ¡Has perdido!")
+                break
+
+            # Mueve la carta al grupo correspondiente
+            self.arrays_mini[next_array].append(act_card)
+
+            # Actualiza el contador del grupo
+            control[next_array] += 1
+            if control[next_array] == 4:  # Si un grupo tiene 4 cartas completas
+                aux_end += 1
+                print(f"Grupo {next_array} completo.")
+
+            # Verifica si se han completado todos los grupos
+            if aux_end >= 13:  # Si todos los grupos tienen 4 cartas
+                print("¡Todos los grupos están completos! ¡Has ganado!")
+                break
+
+            # Actualiza el grupo activo
+            act_array = next_array
+
+            # Verifica si ya no hay cartas en ningún grupo excepto en el activo
+            if all(len(group) == 0 for i, group in enumerate(self.arrays_mini) if i != act_array):
+                print("No hay más cartas disponibles en otros grupos. ¡Has perdido!")
+                break
+
+            # Imprime el estado actual de los grupos
             self.imprimir_grupos()
-            
-        
 
     def imprimir_grupos(self): # Método que imprime los grupos de 4 cartas
         for i in range(len(self.arrays_mini)): # recorre los grupos de 4 cartas
