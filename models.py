@@ -17,12 +17,12 @@ class croupier:
         self.spadesDeck = [] # Baraja de picas
         self.arrays_mini = [[] for _ in range(13)] # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
 
-
         for i in range(1, 14):  # inicializa las cartas de la baraja sin ponerlas en ella
             self.heartsDeck.append(card("hearts", i)) # crea las cartas de corazones
             self.diamonDeck.append(card("diamonds", i)) # crea las cartas de diamantes
             self.clubsDeck.append(card("clubs", i)) # crea las cartas de tréboles
             self.spadesDeck.append(card("spades", i)) # crea las cartas de picas
+
     def init_deck(self):
         self.deck = [] # vacia la baraja porsiacaso
         types = [self.heartsDeck, self.diamonDeck, self.clubsDeck, self.spadesDeck] # tipos de cartas
@@ -66,9 +66,27 @@ class croupier:
                 counter = 0 # reinicia el contador
 
     def card_game(self):
-        actGroup = 13
+        card_index = 0 # se usa para saber cual es la carta que sacaremos
+        act_array = 12 # aca el 13
+        control_13 = 0 # verifica si el grupo 13 ya se completo
+        while self.arrays_mini[act_array]:
+            aux_index = act_array
+            act_card = self.arrays_mini[act_array][0]
+            print(act_card.toString())
+            act_array = act_card.value - 1
+            card_index = len(self.arrays_mini[aux_index])-1
+            self.arrays_mini[act_array].append(self.arrays_mini[aux_index].pop(card_index))
+            
+            
+            if act_card.value == 13:
+                control_13 += 1
+            if control_13 == 4:
+                print("Fin del juego")
+                break
 
-        pass
+            self.imprimir_grupos()
+            
+        
 
     def imprimir_grupos(self): # Método que imprime los grupos de 4 cartas
         for i in range(len(self.arrays_mini)): # recorre los grupos de 4 cartas
@@ -82,12 +100,7 @@ def main():
     dealer = croupier() 
     dealer.init_deck()  
     dealer.shuffle()
-    for i in range(len(dealer.deck)):
-    
+    dealer.posicionate()
+    dealer.card_game()
 if __name__ == "__main__":
     main()
-    croupier = croupier()
-    croupier.init_deck()
-    croupier.shuffle()
-    croupier.posicionate()
-
