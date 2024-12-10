@@ -69,6 +69,11 @@ class croupier:
         card_index = 0 # se usa para saber cual es la carta que sacaremos
         act_array = 12 # aca el 13
         control_13 = 0 # verifica si el grupo 13 ya se completo
+        act_card = self.arrays_mini[act_array][0]
+        aux_index = act_array
+        act_array = act_card.value - 1
+        self.arrays_mini[act_array].append(self.arrays_mini[aux_index].pop(card_index))
+        act_card = self.arrays_mini[act_array][0]
         while self.arrays_mini[act_array]:
             aux_index = act_array
             act_card = self.arrays_mini[act_array][0]
