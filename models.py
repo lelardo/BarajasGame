@@ -236,33 +236,6 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
     pantalla.blit(mensaje, (x + (ancho - mensaje.get_width()) // 2, y + (alto - mensaje.get_height()) // 2))
     return pygame.Rect(x, y, ancho, alto)
 
-def fin_juego(estado_juego):
-    if estado_juego:
-        mostrar_mensaje("Se corto el 13!", ANCHO // 2 - 150, ALTO // 2 - 150, ROJO)
-    else:
-        mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2 - 150, VERDE)
-    boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE,
-                                    BLANCO)
-    boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
-                                BLANCO)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if boton_reiniciar.collidepoint(event.pos):
-                dealer = croupier()
-                dealer.init_deck()
-                dealer.shuffle()
-                dealer.posicionate()
-                grupos_completos = [False, False, False, False, False, False, False, False, False,
-                                    False, False, False, False]
-                perder = False
-            if boton_salir.collidepoint(event.pos):
-                pygame.quit()
-                sys.exit()
-    pygame.display.flip()
-
 
 # Función principal del juego
 def main():
@@ -338,11 +311,55 @@ def main():
                     elif (all(grupos_completos) == True):
                         perder == False
                         while perder == False:
-                            fin_juego(perder)
+                            mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
+                            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE,
+                                                            BLANCO)
+                            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
+                                                        BLANCO)
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    pygame.quit()
+                                    sys.exit()
+                                if event.type == pygame.MOUSEBUTTONDOWN:
+                                    if boton_reiniciar.collidepoint(event.pos):
+                                        dealer = croupier()
+                                        dealer.init_deck()
+                                        dealer.shuffle()
+                                        dealer.posicionate()
+                                        grupos_completos = [False, False, False, False, False, False, False, False,
+                                                            False,
+                                                            False, False, False, False]
+                                        perder = False
+                                    if boton_salir.collidepoint(event.pos):
+                                        pygame.quit()
+                                        sys.exit()
+                            pygame.display.flip()
                     elif (grupos_completos[ite] == True) and (ite == 12):
                         perder = True
                         while perder == True:
-                            fin_juego(perder)
+                            mostrar_mensaje("Se corto el 13!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+                            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE,
+                                                            BLANCO)
+                            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
+                                                        BLANCO)
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    pygame.quit()
+                                    sys.exit()
+                                if event.type == pygame.MOUSEBUTTONDOWN:
+                                    if boton_reiniciar.collidepoint(event.pos):
+                                        dealer = croupier()
+                                        dealer.init_deck()
+                                        dealer.shuffle()
+                                        dealer.posicionate()
+                                        grupos_completos = [False, False, False, False, False, False, False, False,
+                                                            False,
+                                                            False, False, False, False]
+                                        perder = False
+                                    if boton_salir.collidepoint(event.pos):
+                                        pygame.quit()
+                                        sys.exit()
+                            pygame.display.flip()
                     break
 
             else:
