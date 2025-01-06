@@ -309,7 +309,29 @@ def main():
                             i = i + 1
                     elif (grupos_completos[ite] == True) and (ite == 12):
                         perder = True
-                        mostrar_mensaje("¡Game Over!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+                        while perder == True:
+                            mostrar_mensaje("Se corto el 13!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+                            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE,
+                                                            BLANCO)
+                            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
+                                                        BLANCO)
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    pygame.quit()
+                                    sys.exit()
+                                if event.type == pygame.MOUSEBUTTONDOWN:
+                                    if boton_reiniciar.collidepoint(event.pos):
+                                        dealer = croupier()
+                                        dealer.init_deck()
+                                        dealer.shuffle()
+                                        dealer.posicionate()
+                                        grupos_completos = [False, False, False, False, False, False, False, False, False,
+                                                            False, False, False, False]
+                                        perder = False
+                                    if boton_salir.collidepoint(event.pos):
+                                        pygame.quit()
+                                        sys.exit()
+                            pygame.display.flip()
                     break
 
             else:
@@ -318,10 +340,6 @@ def main():
                     grupos_completos[temp_pos] = False
                     Target = None
                     temp_pos = None
-        if grupos_completos[12] == True:
-            mostrar_mensaje("Se corto el 13!", ANCHO // 2 - 150, ALTO // 2, ROJO)
-            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE, BLANCO)
-            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO, BLANCO)
 
         MousePressed = False
         MouseReleased = False
