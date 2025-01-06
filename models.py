@@ -1,6 +1,7 @@
 import random
 import pygame
 import sys
+import time
 from pygame.locals import *
 
 # Inicializa pygame
@@ -46,6 +47,7 @@ posiciones = [
     (ancho / 2 - 50, alto / 2 - 75)
 ]
 
+
 # Clase que representa una carta de la baraja
 class card:
     def __init__(self, type, value):
@@ -75,6 +77,7 @@ class card:
     def toString(self):  # Método que retorna un string con la información de la carta
         return f"Simbolo: {self.type}, Valor: {self.value}"
 
+
 # Clase que representa al croupier
 class croupier:
     def __init__(self):
@@ -83,7 +86,8 @@ class croupier:
         self.heartsDeck = []  # Baraja de corazones
         self.clubsDeck = []  # Baraja de tréboles
         self.spadesDeck = []  # Baraja de picas
-        self.arrays_mini = [[] for _ in range(13)]  # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
+        self.arrays_mini = [[] for _ in
+                            range(13)]  # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
 
         # Inicializa las cartas de la baraja sin ponerlas en ella
         for i in range(1, 14):
@@ -114,16 +118,20 @@ class croupier:
 
             while first_half or second_half:  # mientras haya cartas en alguna de las mitades
                 if first_half:  # para la primera mitad
-                    num_from_first = random.randint(1, min(len(first_half), 4))  # cantidad de cartas que se sacarán de la primera mitad
+                    num_from_first = random.randint(1, min(len(first_half),
+                                                           4))  # cantidad de cartas que se sacarán de la primera mitad
                     for _ in range(num_from_first):  # por cada carta que se sacará
                         if first_half:  # si hay cartas en la primera mitad
-                            self.deck.append(first_half.pop(0))  # saca la carta de la primera mitad y la añade a la baraja
+                            self.deck.append(
+                                first_half.pop(0))  # saca la carta de la primera mitad y la añade a la baraja
 
                 if second_half:  # para la segunda mitad
-                    num_from_second = random.randint(1, min(len(second_half), 4))  # cantidad de cartas que se sacarán de la segunda mitad
+                    num_from_second = random.randint(1, min(len(second_half),
+                                                            4))  # cantidad de cartas que se sacarán de la segunda mitad
                     for _ in range(num_from_second):  # por cada carta que se sacará
                         if second_half:  # si hay cartas en la segunda mitad
-                            self.deck.append(second_half.pop(0))  # saca la carta de la segunda mitad y la añade a la baraja
+                            self.deck.append(
+                                second_half.pop(0))  # saca la carta de la segunda mitad y la añade a la baraja
 
     def posicionate(self):  # Método que posiciona las cartas en los grupos de 4 cartas
         counter = 0  # contador para saber en qué grupo de 4 cartas se está
@@ -206,6 +214,7 @@ class croupier:
             else:
                 grupos_completos[ite] = True
 
+
 # Función para dibujar las cartas en la pantalla
 def dibujar_cartas(wid, hei, hour, dealer):
     # Dibuja las cartas del grupo actual (hour) en la posición especificada (wid, hei)
@@ -220,15 +229,41 @@ def dibujar_cartas(wid, hei, hour, dealer):
             pantalla.blit(carta.carta_imagen, (wid - offset, hei))
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
 
+
 # Función para dibujar el tablero
 def tablero(dealer):
     for i in range(13):
         dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer)
     pygame.display.flip()
 
+
+def mostrar_menu_inicial():
+    while True:
+        pantalla.blit(background_image, (0, 0))
+
+        titulo = fuente.render("Solitario Reloj", True, BLANCO)
+        pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
+
+        boton_manual = dibujar_boton("Jugar Manual", ancho // 2 - 150, alto // 2 - 50, 300, 50, AZUL, BLANCO)
+        boton_auto = dibujar_boton("Jugar Automático", ancho // 2 - 150, alto // 2 + 50, 300, 50, VERDE, BLANCO)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_manual.collidepoint(event.pos):
+                    return "manual"
+                if boton_auto.collidepoint(event.pos):
+                    return "auto"
+
+        pygame.display.flip()
+
+
 def mostrar_mensaje(texto, x, y, color=BLANCO):
     mensaje = fuente.render(texto, True, color)
     pantalla.blit(mensaje, (x, y))
+
 
 def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
     pygame.draw.rect(pantalla, color, (x, y, ancho, alto))
@@ -237,9 +272,56 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
     return pygame.Rect(x, y, ancho, alto)
 
 
+def juego_automatico(dealer):
+    time.sleep(0.5)
+
+    # Comenzamos siempre desde el mazo actual
+    if not hasattr(juego_automatico, "mazo_actual"):
+        juego_automatico.mazo_actual = 12  # Comenzamos desde el mazo inicial (posición 12)
+
+    while True:  # Bucle para continuar moviendo mientras sea posible
+        mazo_actual = juego_automatico.mazo_actual
+
+        # Verificamos si hay cartas en el mazo actual y si la primera no está volteada
+        if (not grupos_completos[mazo_actual]):
+
+            # Tomamos la carta del mazo actual
+            carta = dealer.arrays_mini[mazo_actual][0]
+            destino = carta.value - 1  # Calculamos el destino basado en el valor de la carta
+
+            if not grupos_completos[destino]:
+                # Animación del movimiento
+                inicio_pos = posiciones[mazo_actual]
+                fin_pos = posiciones[destino]
+
+                for t in range(30):
+                    pantalla.blit(background_image, (0, 0))
+                    x = inicio_pos[0] + (fin_pos[0] - inicio_pos[0]) * t / 30
+                    y = inicio_pos[1] + (fin_pos[1] - inicio_pos[1]) * t / 30
+
+                    tablero(dealer)
+                    pantalla.blit(carta.carta_imagen, (x, y))
+                    pygame.display.flip()
+                    clock.tick(60)
+
+                # Realizamos el movimiento
+                dealer.arrays_mini[mazo_actual].remove(carta)
+                dealer.arrays_mini[destino].append(carta)
+
+                # Volteamos la siguiente carta del mazo origen si existe
+                if dealer.arrays_mini[mazo_actual]:
+                    dealer.arrays_mini[destino][0].frente()
+
+                dealer.comprobar_grupos(destino)
+
+                # Actualizamos el mazo actual para que sea el mazo destino
+                juego_automatico.mazo_actual = destino
+
+
 # Función principal del juego
 def main():
     global grupos_completos
+    mode = mostrar_menu_inicial()
     grupos_completos = [False, False, False, False, False, False, False, False, False, False, False, False, False]
     dealer = croupier()
     dealer.init_deck()
@@ -260,120 +342,126 @@ def main():
         pantalla.blit(background_image, (0, 0))
         pos = pygame.mouse.get_pos()
         tablero(dealer)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                MousePressed = True
-                MouseDown = True
-            if event.type == pygame.MOUSEBUTTONUP:
-                MouseReleased = True
-                MouseDown = False
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-        if MousePressed == True:
-            for ite in range(13):
-                if (pos[0] >= (posiciones[ite][0]) and
-                    pos[0] <= (posiciones[ite][0] + 71) and
-                    pos[1] >= (posiciones[ite][1]) and
-                    pos[1] <= (posiciones[ite][1] + 96) and
-                    dealer.arrays_mini[ite][0].volteada == False and
-                    grupos_completos[ite] == False):
-                    Target = dealer.arrays_mini[ite][0]
-                    dealer.arrays_mini[ite].remove(Target)
-                    temp_pos = ite
-                    cought = True
-                    dealer.comprobar_grupos(ite)
-                    print(f"Carta seleccionada: {Target.value}")
-                    break
-            else:
-                cought = False
-        if MouseDown and Target is not None and cought is True:
-            pantalla.blit(Target.carta_imagen, (pos[0] - 20, pos[1] - 20))
-        if MouseReleased and cought is True:
-            for ite in range(13):
-                if (pos[0] >= (posiciones[ite][0]) and
-                        pos[0] <= (posiciones[ite][0] + 71) and
-                        pos[1] >= (posiciones[ite][1]) and
-                        pos[1] <= (posiciones[ite][1] + 96) and
-                        Target.value - 1 == ite):
-                    dealer.arrays_mini[ite].append(Target)
-                    print(f"Carta movida a grupo {ite}")
-                    dealer.arrays_mini[ite][0].frente()
-                    temp_pos = None
-                    Target = None
-                    dealer.comprobar_grupos(ite)
-                    if (grupos_completos[ite] == True) and (ite != 12):
-                        i = ite
-                        while dealer.arrays_mini[i][0].volteada is False:
-                            if i >= 11: i = i - 12
-                            dealer.arrays_mini[i + 1][0].frente()
-                            i = i + 1
-                    elif (all(grupos_completos) == True):
-                        perder == False
-                        while perder == False:
-                            mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
-                            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE,
-                                                            BLANCO)
-                            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
-                                                        BLANCO)
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    if boton_reiniciar.collidepoint(event.pos):
-                                        dealer = croupier()
-                                        dealer.init_deck()
-                                        dealer.shuffle()
-                                        dealer.posicionate()
-                                        grupos_completos = [False, False, False, False, False, False, False, False,
-                                                            False,
-                                                            False, False, False, False]
-                                        perder = False
-                                    if boton_salir.collidepoint(event.pos):
-                                        pygame.quit()
-                                        sys.exit()
-                            pygame.display.flip()
-                    elif (grupos_completos[ite] == True) and (ite == 12):
-                        perder = True
-                        while perder == True:
-                            mostrar_mensaje("Se corto el 13!", ANCHO // 2 - 150, ALTO // 2, ROJO)
-                            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE,
-                                                            BLANCO)
-                            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
-                                                        BLANCO)
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    if boton_reiniciar.collidepoint(event.pos):
-                                        dealer = croupier()
-                                        dealer.init_deck()
-                                        dealer.shuffle()
-                                        dealer.posicionate()
-                                        grupos_completos = [False, False, False, False, False, False, False, False,
-                                                            False,
-                                                            False, False, False, False]
-                                        perder = False
-                                    if boton_salir.collidepoint(event.pos):
-                                        pygame.quit()
-                                        sys.exit()
-                            pygame.display.flip()
-                    break
+        if mode == "manual":
 
-            else:
-                if temp_pos is not None:
-                    dealer.arrays_mini[temp_pos].insert(0, Target)
-                    grupos_completos[temp_pos] = False
-                    Target = None
-                    temp_pos = None
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    MousePressed = True
+                    MouseDown = True
+                if event.type == pygame.MOUSEBUTTONUP:
+                    MouseReleased = True
+                    MouseDown = False
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            if MousePressed == True:
+                for ite in range(13):
+                    if (pos[0] >= (posiciones[ite][0]) and
+                            pos[0] <= (posiciones[ite][0] + 71) and
+                            pos[1] >= (posiciones[ite][1]) and
+                            pos[1] <= (posiciones[ite][1] + 96) and
+                            dealer.arrays_mini[ite][0].volteada == False and
+                            grupos_completos[ite] == False):
+                        Target = dealer.arrays_mini[ite][0]
+                        dealer.arrays_mini[ite].remove(Target)
+                        temp_pos = ite
+                        cought = True
+                        dealer.comprobar_grupos(ite)
+                        print(f"Carta seleccionada: {Target.value}")
+                        break
+                else:
+                    cought = False
+            if MouseDown and Target is not None and cought is True:
+                pantalla.blit(Target.carta_imagen, (pos[0] - 20, pos[1] - 20))
+            if MouseReleased and cought is True:
+                for ite in range(13):
+                    if (pos[0] >= (posiciones[ite][0]) and
+                            pos[0] <= (posiciones[ite][0] + 71) and
+                            pos[1] >= (posiciones[ite][1]) and
+                            pos[1] <= (posiciones[ite][1] + 96) and
+                            Target.value - 1 == ite):
+                        dealer.arrays_mini[ite].append(Target)
+                        print(f"Carta movida a grupo {ite}")
+                        dealer.arrays_mini[ite][0].frente()
+                        temp_pos = None
+                        Target = None
+                        dealer.comprobar_grupos(ite)
+                        if (grupos_completos[ite] == True) and (ite != 12):
+                            i = ite
+                            while dealer.arrays_mini[i][0].volteada is False:
+                                if i >= 11: i = i - 12
+                                dealer.arrays_mini[i + 1][0].frente()
+                                i = i + 1
+                        elif (all(grupos_completos) == True):
+                            perder == False
+                            while perder == False:
+                                mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
+                                boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50,
+                                                                VERDE,
+                                                                BLANCO)
+                                boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
+                                                            BLANCO)
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        if boton_reiniciar.collidepoint(event.pos):
+                                            dealer = croupier()
+                                            dealer.init_deck()
+                                            dealer.shuffle()
+                                            dealer.posicionate()
+                                            grupos_completos = [False, False, False, False, False, False, False, False,
+                                                                False,
+                                                                False, False, False, False]
+                                            perder = False
+                                        if boton_salir.collidepoint(event.pos):
+                                            pygame.quit()
+                                            sys.exit()
+                                pygame.display.flip()
+                        elif (grupos_completos[ite] == True) and (ite == 12):
+                            perder = True
+                            while perder == True:
+                                mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+                                boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50,
+                                                                VERDE,
+                                                                BLANCO)
+                                boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
+                                                            BLANCO)
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        if boton_reiniciar.collidepoint(event.pos):
+                                            dealer = croupier()
+                                            dealer.init_deck()
+                                            dealer.shuffle()
+                                            dealer.posicionate()
+                                            grupos_completos = [False, False, False, False, False, False, False, False,
+                                                                False,
+                                                                False, False, False, False]
+                                            perder = False
+                                        if boton_salir.collidepoint(event.pos):
+                                            pygame.quit()
+                                            sys.exit()
+                                pygame.display.flip()
+                        break
+
+                else:
+                    if temp_pos is not None:
+                        dealer.arrays_mini[temp_pos].insert(0, Target)
+                        grupos_completos[temp_pos] = False
+                        Target = None
+                        temp_pos = None
+        else:
+            juego_automatico(dealer)
+            print("Juego automático")
 
         MousePressed = False
         MouseReleased = False
         pygame.display.flip()
         clock.tick(60)
 
-# Ejecuta la función principal si este archivo es el principal
 if __name__ == "__main__":
     main()
