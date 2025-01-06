@@ -1,19 +1,31 @@
 import random
 import pygame
 import sys
+from pygame.locals import *
 
+# Inicializa pygame
 pygame.init()
 
+# Define el tamaño de la pantalla
 tamanio = ancho, alto = 1024, 768
 
+# Inicializa la fuente
 pygame.font.init()
 fuente = pygame.font.SysFont("monospace", 15)
 pantalla = pygame.display.set_mode(tamanio)
+clock = pygame.time.Clock()
 pygame.display.set_caption("Solitario Reloj")
 halved = pygame.image.load("deck/b2pr.gif")
 halved_rect = halved.get_rect()
 negro = 0, 0, 0
-
+background_image = pygame.image.load("deck/background.jpg")  # Cambia por tu imagen
+background_image = pygame.transform.scale(background_image, (ancho, alto))
+NEGRO = (0, 0, 0)
+BLANCO = (255, 255, 255)
+ROJO = (255, 0, 0)
+fuente = pygame.font.Font(None, 74)
+ANCHO, ALTO = 800, 600
+# Define las posiciones de las cartas en la pantalla
 posiciones = [
     (ancho / 2 - 200, alto / 2 - 300),
     (ancho / 2 - 50, alto / 2 - 300),
@@ -30,8 +42,8 @@ posiciones = [
     (ancho / 2 - 50, alto / 2 - 75)
 ]
 
-
-class card:  # Clase que representa una carta de la baraja
+# Clase que representa una carta de la baraja
+class card:
     def __init__(self, type, value):
         self.type = type  # simbolo de carta (corazones, diamantes, tréboles, picas)
         self.value = value  # valor o numero de la carta
@@ -59,7 +71,7 @@ class card:  # Clase que representa una carta de la baraja
     def toString(self):  # Método que retorna un string con la información de la carta
         return f"Simbolo: {self.type}, Valor: {self.value}"
 
-
+# Clase que representa al croupier
 class croupier:
     def __init__(self):
         self.deck = []  # Baraja de cartas (baraja general)
@@ -67,10 +79,10 @@ class croupier:
         self.heartsDeck = []  # Baraja de corazones
         self.clubsDeck = []  # Baraja de tréboles
         self.spadesDeck = []  # Baraja de picas
-        self.arrays_mini = [[] for _ in
-                            range(13)]  # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
+        self.arrays_mini = [[] for _ in range(13)]  # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
 
-        for i in range(1, 14):  # inicializa las cartas de la baraja sin ponerlas en ella
+        # Inicializa las cartas de la baraja sin ponerlas en ella
+        for i in range(1, 14):
             self.heartsDeck.append(card("hearts", i))  # crea las cartas de corazones
             self.diamonDeck.append(card("diamonds", i))  # crea las cartas de diamantes
             self.clubsDeck.append(card("clubs", i))  # crea las cartas de tréboles
@@ -91,7 +103,6 @@ class croupier:
         shuffle_count = random.randint(5, 10)  # cantidad de veces que se barajará la baraja
 
         for _ in range(shuffle_count):  # baraja la baraja shuffle_count veces
-
             mid = len(self.deck) // 2  # divide la baraja en dos
             first_half = self.deck[:mid]  # primera mitad de la baraja
             second_half = self.deck[mid:]  # segunda mitad de la baraja
@@ -99,20 +110,16 @@ class croupier:
 
             while first_half or second_half:  # mientras haya cartas en alguna de las mitades
                 if first_half:  # para la primera mitad
-                    num_from_first = random.randint(1, min(len(first_half),
-                                                           4))  # cantidad de cartas que se sacarán de la primera mitad
+                    num_from_first = random.randint(1, min(len(first_half), 4))  # cantidad de cartas que se sacarán de la primera mitad
                     for _ in range(num_from_first):  # por cada carta que se sacará
                         if first_half:  # si hay cartas en la primera mitad
-                            self.deck.append(
-                                first_half.pop(0))  # saca la carta de la primera mitad y la añade a la baraja
+                            self.deck.append(first_half.pop(0))  # saca la carta de la primera mitad y la añade a la baraja
 
                 if second_half:  # para la segunda mitad
-                    num_from_second = random.randint(1, min(len(second_half),
-                                                            4))  # cantidad de cartas que se sacarán de la segunda mitad
+                    num_from_second = random.randint(1, min(len(second_half), 4))  # cantidad de cartas que se sacarán de la segunda mitad
                     for _ in range(num_from_second):  # por cada carta que se sacará
                         if second_half:  # si hay cartas en la segunda mitad
-                            self.deck.append(
-                                second_half.pop(0))  # saca la carta de la segunda mitad y la añade a la baraja
+                            self.deck.append(second_half.pop(0))  # saca la carta de la segunda mitad y la añade a la baraja
 
     def posicionate(self):  # Método que posiciona las cartas en los grupos de 4 cartas
         counter = 0  # contador para saber en qué grupo de 4 cartas se está
@@ -166,7 +173,7 @@ class croupier:
             # Verifica si ya no hay cartas en ningún grupo excepto en el activo
             if all(len(group) == 0 for i, group in enumerate(self.arrays_mini) if i != act_array):
                 print("No hay más cartas disponibles en otros grupos. ¡Has perdido!")
-                break
+                mostrar_mensaje("¡Game Over!", ANCHO // 2 - 150, ALTO // 2, ROJO)
 
             # Imprime el estado actual de los grupos
             self.imprimir_grupos()
@@ -195,7 +202,7 @@ class croupier:
             else:
                 grupos_completos[ite] = True
 
-
+# Función para dibujar las cartas en la pantalla
 def dibujar_cartas(wid, hei, hour, dealer):
     # Dibuja las cartas del grupo actual (hour) en la posición especificada (wid, hei)
     offset = 0  # Desplazamiento inicial para apilar las cartas
@@ -209,13 +216,17 @@ def dibujar_cartas(wid, hei, hour, dealer):
             pantalla.blit(carta.carta_imagen, (wid - offset, hei))
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
 
-
+# Función para dibujar el tablero
 def tablero(dealer):
     for i in range(13):
         dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer)
     pygame.display.flip()
 
+def mostrar_mensaje(texto, x, y, color=BLANCO):
+    mensaje = fuente.render(texto, True, color)
+    pantalla.blit(mensaje, (x, y))
 
+# Función principal del juego
 def main():
     global grupos_completos
     grupos_completos = [False, False, False, False, False, False, False, False, False, False, False, False, False]
@@ -235,7 +246,7 @@ def main():
     for numero in dealer.arrays_mini[12]:
         print(numero.toString())
     while True:
-        pantalla.fill((0, 0, 0))
+        pantalla.blit(background_image, (0, 0))
         pos = pygame.mouse.get_pos()
         if perder == False:
             tablero(dealer)
@@ -301,7 +312,8 @@ def main():
         MousePressed = False
         MouseReleased = False
         pygame.display.flip()
+        clock.tick(60)
 
-
+# Ejecuta la función principal si este archivo es el principal
 if __name__ == "__main__":
     main()
