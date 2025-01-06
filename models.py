@@ -23,7 +23,11 @@ background_image = pygame.transform.scale(background_image, (ancho, alto))
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
 ROJO = (255, 0, 0)
+AZUL = (0, 0, 255)
+VERDE = (0, 255, 0)
+GRIS = (100, 100, 100)
 fuente = pygame.font.Font(None, 74)
+fuente_botones = pygame.font.Font(None, 50)
 ANCHO, ALTO = 800, 600
 # Define las posiciones de las cartas en la pantalla
 posiciones = [
@@ -226,6 +230,12 @@ def mostrar_mensaje(texto, x, y, color=BLANCO):
     mensaje = fuente.render(texto, True, color)
     pantalla.blit(mensaje, (x, y))
 
+def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
+    pygame.draw.rect(pantalla, color, (x, y, ancho, alto))
+    mensaje = fuente_botones.render(texto, True, color_texto)
+    pantalla.blit(mensaje, (x + (ancho - mensaje.get_width()) // 2, y + (alto - mensaje.get_height()) // 2))
+    return pygame.Rect(x, y, ancho, alto)
+
 # Función principal del juego
 def main():
     global grupos_completos
@@ -248,8 +258,7 @@ def main():
     while True:
         pantalla.blit(background_image, (0, 0))
         pos = pygame.mouse.get_pos()
-        if perder == False:
-            tablero(dealer)
+        tablero(dealer)
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 MousePressed = True
@@ -300,6 +309,7 @@ def main():
                             i = i + 1
                     elif (grupos_completos[ite] == True) and (ite == 12):
                         perder = True
+                        mostrar_mensaje("¡Game Over!", ANCHO // 2 - 150, ALTO // 2, ROJO)
                     break
 
             else:
@@ -308,6 +318,10 @@ def main():
                     grupos_completos[temp_pos] = False
                     Target = None
                     temp_pos = None
+        if grupos_completos[12] == True:
+            mostrar_mensaje("Se corto el 13!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE, BLANCO)
+            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO, BLANCO)
 
         MousePressed = False
         MouseReleased = False
