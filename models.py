@@ -53,9 +53,11 @@ posiciones = [
 # Clase que representa una carta de la baraja
 class card:
     # Color rosa claro en hexadecimal
-    TINT_COLOR = (0xeac637)
-    backfaces = ["calaca", "geom", "greek", "maya", "rara", "sheng"]
-    sele = 4
+    colors = [0x8E7F48, 0xC5E5EA, 0x7F7F7F,0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
+    backfaces = ["calaca", "geom", "greek", "maya", "rara", "sheng", "magic", "uno", "poke", "yugi"]
+    sele = 9
+    TINT_COLOR = colors[sele] # Color de tinte para las cartas, agregar para las ultimas 4 cartas
+
     
     def __init__(self, type, value):
         self.type = type
