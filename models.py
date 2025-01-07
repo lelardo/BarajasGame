@@ -27,8 +27,10 @@ ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
 GRIS = (100, 100, 100)
+FONDO_COLOR = (50, 50, 50) 
 fuente = pygame.font.Font(None, 74)
-fuente_botones = pygame.font.Font(None, 50)
+fuente_botones = pygame.font.SysFont("comicsansms", 40, bold=True)
+fuente_titulo = pygame.font.SysFont("comicsansms", 70, bold=True)
 ANCHO, ALTO = 800, 600
 # Define las posiciones de las cartas en la pantalla
 posiciones = [
@@ -50,21 +52,52 @@ posiciones = [
 
 # Clase que representa una carta de la baraja
 class card:
+    # Color rosa claro en hexadecimal
+    TINT_COLOR = (0xeac637)
+    backfaces = ["calaca", "geom", "greek", "maya", "rara", "sheng"]
+    sele = 4
+    
     def __init__(self, type, value):
-        self.type = type  # simbolo de carta (corazones, diamantes, tréboles, picas)
-        self.value = value  # valor o numero de la carta
+        self.type = type
+        self.value = value
         self.volteada = True
-        self.carta_imagen = pygame.image.load("deck/b2fv.gif")
+        if card.sele is None or card.sele < 0 or card.sele >= len(card.backfaces):
+            # Usar el diseño por defecto si `sele` no es válido
+            self.carta_imagen = pygame.image.load("deck/b2fv.gif").convert()
+        else:
+            # Cargar la cara trasera seleccionada
+            backface_name = card.backfaces[card.sele]  # Obtener el nombre de la imagen
+            self.carta_imagen = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
+
+    def _load_and_tint(self, image_path):
+        # Convertimos el hexadecimal a RGB
+        r = (self.TINT_COLOR >> 16) & 255
+        g = (self.TINT_COLOR >> 8) & 255
+        b = self.TINT_COLOR & 255
+        
+        # Carga la imagen y la convierte al formato correcto
+        original = pygame.image.load(image_path).convert()
+        tinted = original.copy()
+        
+        # Aplicamos el tinte pixel por pixel
+        for x in range(tinted.get_width()):
+            for y in range(tinted.get_height()):
+                color = tinted.get_at((x, y))
+                # Solo modificamos los píxeles blancos o casi blancos
+                if color.r > 240 and color.g > 240 and color.b > 240:
+                    tinted.set_at((x, y), (r, g, b))
+        
+        return tinted
 
     def frente(self):
         self.volteada = False
-        self.carta_imagen = pygame.image.load(
+        self.carta_imagen = self._load_and_tint(
             "deck/" + self.simbolo() + str(self.value) + ".gif"
         )
 
     def reverso(self):
         self.volteada = True
-        self.carta_imagen = pygame.image.load("deck/b2fv.gif")
+        self.carta_imagen = pygame.image.load("deck/b2fv.gif").convert()
 
     def simbolo(self):
         if self.type == "hearts":
@@ -76,8 +109,9 @@ class card:
         if self.type == "spades":
             return "s"
 
-    def toString(self):  # Método que retorna un string con la información de la carta
+    def toString(self):
         return f"Simbolo: {self.type}, Valor: {self.value}"
+
 
 
 # Clase que representa al croupier
@@ -274,28 +308,33 @@ def mostrar_menu_inicial():
     while True:
         pantalla.blit(background_image, (0, 0))
 
-        titulo = fuente.render("Solitario Reloj", True, BLANCO)
+        # Título centrado con una fuente bonita
+        titulo = fuente_titulo.render("Solitario Reloj", True, BLANCO)
         pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
 
+        # Botones centrados
         boton_manual = dibujar_boton(
-            "Jugar Manual", ancho // 2 - 150, alto // 2 - 50, 300, 50, AZUL, BLANCO
+            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, GRIS, BLANCO
         )
         boton_auto = dibujar_boton(
-            "Jugar Automático", ancho // 2 - 150, alto // 2 + 50, 300, 50, VERDE, BLANCO
+            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, GRIS, BLANCO
         )
 
+        # Efecto hover: cambio de color de los botones al pasar el mouse
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_manual.collidepoint(event.pos):
                     return "manual"
                 if boton_auto.collidepoint(event.pos):
                     return "auto"
 
-        pygame.display.flip()
 
+
+        pygame.display.flip()
 
 def mostrar_mensaje(texto, x, y, color=BLANCO):
     mensaje = fuente.render(texto, True, color)
@@ -318,7 +357,7 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
 def endgame(perder, grupos_completos):
     casa = False
     if all(grupos_completos) == True:
-        perder = True
+        perder = False
     while casa == False:
         # Dibujar fondo gris
         rect_x = ANCHO // 2 - 200
