@@ -314,23 +314,61 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
     return pygame.Rect(x, y, ancho, alto)
 
 
+def endgame(perder, grupos_completos):
+    casa = False
+    if all(grupos_completos):
+        perder = False
+
+    if perder:
+        mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+    else:
+        mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
+    while casa == False:
+        boton_reiniciar = dibujar_boton(
+            "Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE, BLANCO
+        )
+        boton_salir = dibujar_boton(
+            "Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO, BLANCO
+        )
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_reiniciar.collidepoint(event.pos):
+                    dealer = croupier()
+                    dealer.init_deck()
+                    dealer.shuffle()
+                    dealer.posicionate()
+                    grupos_completos = [False] * 13
+                    perder = False
+                if boton_salir.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
+        pygame.display.flip()
+        break  # Salimos del bucle si se reinicia o se cierra el juego
+
+
 def juego_automatico(dealer):
     time.sleep(0.5)
     global grupos_completos
     grupos_completos = [False] * 13  # Inicializamos el estado de los grupos
 
-    # Comenzamos siempre desde el mazo actual
     if not hasattr(juego_automatico, "mazo_actual"):
-        juego_automatico.mazo_actual = 12  # Comenzamos desde el mazo inicial (posición 12)
-
-    while True:  # Bucle para continuar moviendo mientras sea posible
+        juego_automatico.mazo_actual = (
+            12  # Comenzamos desde el mazo inicial (posición 12)
+        )
+    casa = True
+    while casa:  # Bucle para continuar moviendo mientras sea posible
         mazo_actual = juego_automatico.mazo_actual
 
         # Verificamos si hay cartas en el mazo actual y si el grupo no está completo
         if not grupos_completos[mazo_actual] and dealer.arrays_mini[mazo_actual]:
             # Tomamos la carta del mazo actual
             carta = dealer.arrays_mini[mazo_actual][0]
-            destino = carta.value - 1  # Calculamos el destino basado en el valor de la carta
+            destino = (
+                carta.value - 1
+            )  # Calculamos el destino basado en el valor de la carta
 
             if not grupos_completos[destino]:
                 # Animación del movimiento
@@ -364,53 +402,14 @@ def juego_automatico(dealer):
         # Verificamos si el grupo 12 está completo o si todos los grupos lo están
         if grupos_completos[12]:
             perder = True
-            if all(grupos_completos):
-                perder = False
-
-            if perder:
-                mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2, ROJO)
-            else:
-                mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
-            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE, BLANCO)
-            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO, BLANCO)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if boton_reiniciar.collidepoint(event.pos):
-                        dealer = croupier()
-                        dealer.init_deck()
-                        dealer.shuffle()
-                        dealer.posicionate()
-                        grupos_completos = [False] * 13
-                        perder = False
-                    if boton_salir.collidepoint(event.pos):
-                        pygame.quit()
-                        sys.exit()
-            pygame.display.flip()
-            break  # Salimos del bucle si se reinicia o se cierra el juego
+            endgame(perder, grupos_completos=grupos_completos)
 
 
 # Función principal del juego
 def main():
     global grupos_completos
     mode = mostrar_menu_inicial()
-    grupos_completos = [
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-    ]
+    grupos_completos = [False] * 13
     dealer = croupier()
     dealer.init_deck()
     dealer.shuffle()
