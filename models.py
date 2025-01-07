@@ -318,19 +318,30 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
 def endgame(perder, grupos_completos):
     casa = False
     if all(grupos_completos) == True:
-        perder = False
-
-    if perder:
-        mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2, ROJO)
-    else:
-        mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
+        perder = True
     while casa == False:
+        # Dibujar fondo gris
+        rect_x = ANCHO // 2 - 200
+        rect_y = ALTO // 2 - 150
+        rect_ancho = 600
+        rect_alto = 300
+        pygame.draw.rect(pantalla, (169, 169, 169), (rect_x, rect_y, rect_ancho, rect_alto))  # Gris claro
+        pygame.draw.rect(pantalla, (0, 0, 0), (rect_x, rect_y, rect_ancho, rect_alto), 3)  # Bordes negros
+
+        # Volver a mostrar el mensaje sobre el rectángulo gris
+        if perder:
+            mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2 - 100, ROJO)
+        else:
+            mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2 - 100, VERDE)
+
+        # Dibujar botones sobre el rectángulo gris
         boton_reiniciar = dibujar_boton(
-            "Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE, BLANCO
+            "Reiniciar", ancho // 2 - 150, alto // 2 - 100, 300, 50, VERDE, BLANCO
         )
         boton_salir = dibujar_boton(
-            "Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO, BLANCO
+            "Salir", ancho // 2 - 150, alto // 2, 300, 50, ROJO, BLANCO
         )
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -349,6 +360,7 @@ def endgame(perder, grupos_completos):
                     pygame.quit()
                     sys.exit()
         pygame.display.flip()
+
 
 def juego_automatico(dealer):
     time.sleep(0.5)
