@@ -402,8 +402,7 @@ def juego_automatico(dealer):
         # Verificamos si el grupo 12 está completo o si todos los grupos lo están
         if grupos_completos[12]:
             perder = True
-            endgame(perder, grupos_completos=grupos_completos)
-
+            endgame(perder, grupos_completos)
 
 # Función principal del juego
 def main():
