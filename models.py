@@ -27,10 +27,11 @@ ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
 GRIS = (100, 100, 100)
-FONDO_COLOR = (50, 50, 50) 
+FONDO_COLOR = (50, 50, 50)
 fuente = pygame.font.Font(None, 74)
 fuente_botones = pygame.font.SysFont("comicsansms", 40, bold=True)
 fuente_titulo = pygame.font.SysFont("comicsansms", 70, bold=True)
+fuente_texto = pygame.font.SysFont("comicsansms", 20, bold=True)
 ANCHO, ALTO = 800, 600
 # Define las posiciones de las cartas en la pantalla
 posiciones = [
@@ -53,22 +54,24 @@ posiciones = [
 # Clase que representa una carta de la baraja
 class card:
     # Color rosa claro en hexadecimal
-    colors = [0x8E7F48, 0xC5E5EA, 0x7F7F7F,0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
+    colors = [0x8E7F48, 0xC5E5EA, 0x7F7F7F, 0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
     backfaces = ["calaca", "geom", "greek", "maya", "rara", "sheng", "magic", "uno", "poke", "yugi"]
     sele = 9
-    TINT_COLOR = colors[sele] # Color de tinte para las cartas, agregar para las ultimas 4 cartas
+    TINT_COLOR = colors[sele]  # Color de tinte para las cartas, agregar para las ultimas 4 cartas
 
-    
     def __init__(self, type, value):
         self.type = type
         self.value = value
         self.volteada = True
-        if card.sele is None or card.sele < 0 or card.sele >= len(card.backfaces):
-            # Usar el diseño por defecto si `sele` no es válido
+        self.set_backface()
+
+    def set_backface(self):
+        if GLOBAL_BACKFACE_INDEX < 0 or GLOBAL_BACKFACE_INDEX >= len(self.backfaces):
+            # Usar diseño por defecto si el índice no es válido
             self.carta_imagen = pygame.image.load("deck/b2fv.gif").convert()
         else:
             # Cargar la cara trasera seleccionada
-            backface_name = card.backfaces[card.sele]  # Obtener el nombre de la imagen
+            backface_name = self.backfaces[GLOBAL_BACKFACE_INDEX]
             self.carta_imagen = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
 
     def _load_and_tint(self, image_path):
@@ -76,11 +79,11 @@ class card:
         r = (self.TINT_COLOR >> 16) & 255
         g = (self.TINT_COLOR >> 8) & 255
         b = self.TINT_COLOR & 255
-        
+
         # Carga la imagen y la convierte al formato correcto
         original = pygame.image.load(image_path).convert()
         tinted = original.copy()
-        
+
         # Aplicamos el tinte pixel por pixel
         for x in range(tinted.get_width()):
             for y in range(tinted.get_height()):
@@ -88,7 +91,7 @@ class card:
                 # Solo modificamos los píxeles blancos o casi blancos
                 if color.r > 240 and color.g > 240 and color.b > 240:
                     tinted.set_at((x, y), (r, g, b))
-        
+
         return tinted
 
     def frente(self):
@@ -113,7 +116,6 @@ class card:
 
     def toString(self):
         return f"Simbolo: {self.type}, Valor: {self.value}"
-
 
 
 # Clase que representa al croupier
@@ -163,7 +165,7 @@ class croupier:
             self.deck = []  # vacía la baraja para volver a rellenarla
 
             while (
-                first_half or second_half
+                    first_half or second_half
             ):  # mientras haya cartas en alguna de las mitades
                 if first_half:  # para la primera mitad
                     num_from_first = random.randint(
@@ -248,9 +250,9 @@ class croupier:
 
             # Verifica si ya no hay cartas en ningún grupo excepto en el activo
             if all(
-                len(group) == 0
-                for i, group in enumerate(self.arrays_mini)
-                if i != act_array
+                    len(group) == 0
+                    for i, group in enumerate(self.arrays_mini)
+                    if i != act_array
             ):
                 print("No hay más cartas disponibles en otros grupos. ¡Has perdido!")
                 mostrar_mensaje("¡Game Over!", ANCHO // 2 - 150, ALTO // 2, ROJO)
@@ -284,8 +286,56 @@ class croupier:
                 grupos_completos[ite] = True
 
 
-# Función para dibujar las cartas en la pantalla
-def dibujar_cartas(wid, hei, hour, dealer):
+"""METODOS UI"""
+
+
+def dibujar_cartas(wid, hei, hour, dealer, coords):
+    offset = 0  # Desplazamiento inicial para apilar las cartas
+    aux = reversed(dealer.arrays_mini[hour])
+
+    # Coordenadas iniciales
+    start_x, start_y = coords
+
+    cartas_colocadas = []  # Mantiene un registro de las cartas ya colocadas
+
+    for i, carta in enumerate(aux):
+        # Calcula la posición inicial y final para cada carta
+        end_x = wid - offset
+        end_y = hei
+        current_x = start_x
+        current_y = start_y
+
+        # Animación de la carta desde coords hasta (end_x, end_y)
+        steps = 30  # Número de pasos en la animación
+        for step in range(steps):
+            # Interpolación lineal de posición
+            current_x = start_x + (end_x - start_x) * (step / steps)
+            current_y = start_y + (end_y - start_y) * (step / steps)
+
+            # Redibuja el fondo
+            pantalla.blit(background_image, (0, 0))  # Ajusta según tu contexto
+            for j in range(hour):
+                dibujar_grupos(posiciones[j][0], posiciones[j][1], j, dealer)
+
+            # Redibuja las cartas ya colocadas
+            for colocada, (x, y) in cartas_colocadas:
+                pantalla.blit(colocada.carta_imagen, (x, y))
+
+            # Dibuja la carta en movimiento
+            pantalla.blit(carta.carta_imagen, (current_x, current_y))
+
+            # Actualiza la pantalla y espera un momento
+            pygame.display.flip()
+            time.sleep(0.00001)
+
+        # Agrega la carta a la lista de cartas colocadas
+        cartas_colocadas.append((carta, (end_x, end_y)))
+
+        # Actualiza el desplazamiento para la siguiente carta
+        offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
+
+
+def dibujar_grupos(wid, hei, hour, dealer):
     # Dibuja las cartas del grupo actual (hour) en la posición especificada (wid, hei)
     offset = 0  # Desplazamiento inicial para apilar las cartas
     aux = reversed(dealer.arrays_mini[hour])
@@ -298,45 +348,6 @@ def dibujar_cartas(wid, hei, hour, dealer):
             pantalla.blit(carta.carta_imagen, (wid - offset, hei))
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
 
-
-# Función para dibujar el tablero
-def tablero(dealer):
-    for i in range(13):
-        dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer)
-    pygame.display.flip()
-
-
-def mostrar_menu_inicial():
-    while True:
-        pantalla.blit(background_image, (0, 0))
-
-        # Título centrado con una fuente bonita
-        titulo = fuente_titulo.render("Solitario Reloj", True, BLANCO)
-        pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
-
-        # Botones centrados
-        boton_manual = dibujar_boton(
-            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, GRIS, BLANCO
-        )
-        boton_auto = dibujar_boton(
-            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, GRIS, BLANCO
-        )
-
-        # Efecto hover: cambio de color de los botones al pasar el mouse
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if boton_manual.collidepoint(event.pos):
-                    return "manual"
-                if boton_auto.collidepoint(event.pos):
-                    return "auto"
-
-
-
-        pygame.display.flip()
 
 def mostrar_mensaje(texto, x, y, color=BLANCO):
     mensaje = fuente.render(texto, True, color)
@@ -354,6 +365,80 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
         ),
     )
     return pygame.Rect(x, y, ancho, alto)
+
+
+"""METODOS JUEGO"""
+
+
+# Función para dibujar el tablero
+def tablero_animacion(dealer, coords):
+    for i in range(13):
+        dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer, coords)
+        if i == 12:  # Último grupo
+            return False
+    pygame.display.flip()
+
+
+def tablero(dealer):
+    for i in range(13):
+        dibujar_grupos(posiciones[i][0], posiciones[i][1], i, dealer)
+    pygame.display.flip()
+
+
+def mostrar_menu_inicial():
+    backfaces = card.backfaces
+    global GLOBAL_BACKFACE_INDEX
+    GLOBAL_BACKFACE_INDEX = 0
+    while True:
+        pantalla.blit(background_image, (0, 0))
+
+        # Título centrado con una fuente bonita
+        titulo = fuente_titulo.render("Solitario Reloj", True, BLANCO)
+        pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
+        # Botones centrados
+        boton_manual = dibujar_boton(
+            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, GRIS, BLANCO
+        )
+        boton_auto = dibujar_boton(
+            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, GRIS, BLANCO
+        )
+        boton_dorsal_superior = dibujar_boton(
+            "<<", ancho // 2 - 180, alto // 2 + 150, 50, 50, GRIS, BLANCO
+        )
+        boton_dorsal_inferior = dibujar_boton(
+            ">>", ancho // 2 - 50, alto // 2 + 150, 50, 50, GRIS, BLANCO
+        )
+        boton_color_superior = dibujar_boton(
+            "<<", ancho // 2 + 25, alto // 2 + 150, 50, 50, GRIS, BLANCO
+        )
+        boton_color_inferior = dibujar_boton(
+            ">>", ancho // 2 + 155, alto // 2 + 150, 50, 50, GRIS, BLANCO
+        )
+
+        # Dibujar la dorsal seleccionada
+        dorsal_actual = backfaces[GLOBAL_BACKFACE_INDEX]
+        back_image = pygame.image.load(f"deck/backfaces/{dorsal_actual}.png").convert()
+        pantalla.blit(back_image, (ancho // 2 - 125, alto // 2 + 130))  # Ajusta posición y tamaño según sea necesario
+        nombre_dorsal = fuente_texto.render(f"{dorsal_actual.upper()}", True, BLANCO)
+        pantalla.blit(nombre_dorsal, (ancho // 2 - 130, alto // 2 + 225))
+
+        # Manejo de eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_dorsal_superior.collidepoint(event.pos):
+                    GLOBAL_BACKFACE_INDEX = (GLOBAL_BACKFACE_INDEX - 1) % len(backfaces)
+                    print(f"Dorsal seleccionada: {backfaces[GLOBAL_BACKFACE_INDEX]}")
+                if boton_dorsal_inferior.collidepoint(event.pos):
+                    GLOBAL_BACKFACE_INDEX = (GLOBAL_BACKFACE_INDEX + 1) % len(backfaces)
+                    print(f"Dorsal seleccionada: {backfaces[GLOBAL_BACKFACE_INDEX]}")
+                if boton_manual.collidepoint(event.pos):
+                    return "manual"
+                if boton_auto.collidepoint(event.pos):
+                    return "auto"
+        pygame.display.flip()
 
 
 def endgame(perder, grupos_completos):
@@ -421,7 +506,7 @@ def juego_automatico(dealer):
             # Tomamos la carta del mazo actual
             carta = dealer.arrays_mini[mazo_actual][0]
             destino = (
-                carta.value - 1
+                    carta.value - 1
             )  # Calculamos el destino basado en el valor de la carta
 
             if not grupos_completos[destino]:
@@ -458,12 +543,14 @@ def juego_automatico(dealer):
             perder = True
             endgame(perder, grupos_completos)
 
+
 # Función principal del juego
 def main():
     global grupos_completos
+    global GLOBAL_BACKFACE_INDEX
+    coords = [ancho // 2 - 180, alto // 2 + 150]
     mode = mostrar_menu_inicial()
     grupos_completos = [False] * 13
-
     dealer = croupier()
     dealer.init_deck()
     dealer.shuffle()
@@ -479,9 +566,12 @@ def main():
     print(len(dealer.arrays_mini))
     for numero in dealer.arrays_mini[12]:
         print(numero.toString())
+    repartiendo = True
     while True:
         pantalla.blit(background_image, (0, 0))
         pos = pygame.mouse.get_pos()
+        while repartiendo:
+            repartiendo = tablero_animacion(dealer, coords)
         tablero(dealer)
         if mode == "manual":
             for event in pygame.event.get():
@@ -497,12 +587,12 @@ def main():
             if MousePressed == True:
                 for ite in range(13):
                     if (
-                        pos[0] >= (posiciones[ite][0])
-                        and pos[0] <= (posiciones[ite][0] + 71)
-                        and pos[1] >= (posiciones[ite][1])
-                        and pos[1] <= (posiciones[ite][1] + 96)
-                        and dealer.arrays_mini[ite][0].volteada == False
-                        and grupos_completos[ite] == False
+                            pos[0] >= (posiciones[ite][0])
+                            and pos[0] <= (posiciones[ite][0] + 96)
+                            and pos[1] >= (posiciones[ite][1])
+                            and pos[1] <= (posiciones[ite][1] + 96)
+                            and dealer.arrays_mini[ite][0].volteada == False
+                            and grupos_completos[ite] == False
                     ):
                         Target = dealer.arrays_mini[ite][0]
                         dealer.arrays_mini[ite].remove(Target)
@@ -518,11 +608,11 @@ def main():
             if MouseReleased and cought is True:
                 for ite in range(13):
                     if (
-                        pos[0] >= (posiciones[ite][0])
-                        and pos[0] <= (posiciones[ite][0] + 71)
-                        and pos[1] >= (posiciones[ite][1])
-                        and pos[1] <= (posiciones[ite][1] + 96)
-                        and Target.value - 1 == ite
+                            pos[0] >= (posiciones[ite][0])
+                            and pos[0] <= (posiciones[ite][0] + 96)
+                            and pos[1] >= (posiciones[ite][1])
+                            and pos[1] <= (posiciones[ite][1] + 96)
+                            and Target.value - 1 == ite
                     ):
                         dealer.arrays_mini[ite].append(Target)
                         print(f"Carta movida a grupo {ite}")
@@ -540,7 +630,6 @@ def main():
                         if grupos_completos[12] == True:
                             perder = True
                             endgame(perder, grupos_completos)
-
                 else:
                     if temp_pos is not None:
                         dealer.arrays_mini[temp_pos].insert(0, Target)
@@ -548,6 +637,8 @@ def main():
                         Target = None
                         temp_pos = None
         else:
+            while repartiendo:
+                repartiendo = tablero_animacion(dealer, coords)
             tablero(dealer)
             juego_automatico(dealer)
             print("Juego automático")
