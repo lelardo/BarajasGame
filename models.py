@@ -296,6 +296,10 @@ def dibujar_cartas(wid, hei, hour, dealer):
             pantalla.blit(carta.carta_imagen, (wid - offset, hei))
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
 
+    # Agrega el texto indicando el número de la pila
+    texto = fuente.render(str(hour + 1), True, BLANCO)
+    pantalla.blit(texto, (wid, hei - 20))
+
 
 # Función para dibujar el tablero
 def tablero(dealer):
