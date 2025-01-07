@@ -44,7 +44,7 @@ posiciones = [
     (ancho / 2 - 325, alto / 2 + 50),
     (ancho / 2 - 325, alto / 2 - 75),
     (ancho / 2 - 325, alto / 2 - 200),
-    (ancho / 2 - 50, alto / 2 - 75)
+    (ancho / 2 - 50, alto / 2 - 75),
 ]
 
 
@@ -58,7 +58,9 @@ class card:
 
     def frente(self):
         self.volteada = False
-        self.carta_imagen = pygame.image.load("deck/" + self.simbolo() + str(self.value) + ".gif")
+        self.carta_imagen = pygame.image.load(
+            "deck/" + self.simbolo() + str(self.value) + ".gif"
+        )
 
     def reverso(self):
         self.volteada = True
@@ -86,8 +88,9 @@ class croupier:
         self.heartsDeck = []  # Baraja de corazones
         self.clubsDeck = []  # Baraja de tréboles
         self.spadesDeck = []  # Baraja de picas
-        self.arrays_mini = [[] for _ in
-                            range(13)]  # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
+        self.arrays_mini = [
+            [] for _ in range(13)
+        ]  # pequeños arrays de 4 cartas, simulan los grupos de 4 cartas en el juego
 
         # Inicializa las cartas de la baraja sin ponerlas en ella
         for i in range(1, 14):
@@ -98,7 +101,12 @@ class croupier:
 
     def init_deck(self):
         self.deck = []  # vacia la baraja porsiacaso
-        types = [self.heartsDeck, self.diamonDeck, self.clubsDeck, self.spadesDeck]  # tipos de cartas
+        types = [
+            self.heartsDeck,
+            self.diamonDeck,
+            self.clubsDeck,
+            self.spadesDeck,
+        ]  # tipos de cartas
         for deck_type in types:  # recorre los tipos de cartas
             self.deck.extend(deck_type)  # añade las cartas al mazo general
         self.shuffle()  # baraja la baraja segun nuestro metodo
@@ -108,7 +116,9 @@ class croupier:
             print("La baraja está vacía. No se puede barajar.")
             return  # termina la función
 
-        shuffle_count = random.randint(5, 10)  # cantidad de veces que se barajará la baraja
+        shuffle_count = random.randint(
+            5, 10
+        )  # cantidad de veces que se barajará la baraja
 
         for _ in range(shuffle_count):  # baraja la baraja shuffle_count veces
             mid = len(self.deck) // 2  # divide la baraja en dos
@@ -116,27 +126,35 @@ class croupier:
             second_half = self.deck[mid:]  # segunda mitad de la baraja
             self.deck = []  # vacía la baraja para volver a rellenarla
 
-            while first_half or second_half:  # mientras haya cartas en alguna de las mitades
+            while (
+                first_half or second_half
+            ):  # mientras haya cartas en alguna de las mitades
                 if first_half:  # para la primera mitad
-                    num_from_first = random.randint(1, min(len(first_half),
-                                                           4))  # cantidad de cartas que se sacarán de la primera mitad
+                    num_from_first = random.randint(
+                        1, min(len(first_half), 4)
+                    )  # cantidad de cartas que se sacarán de la primera mitad
                     for _ in range(num_from_first):  # por cada carta que se sacará
                         if first_half:  # si hay cartas en la primera mitad
                             self.deck.append(
-                                first_half.pop(0))  # saca la carta de la primera mitad y la añade a la baraja
+                                first_half.pop(0)
+                            )  # saca la carta de la primera mitad y la añade a la baraja
 
                 if second_half:  # para la segunda mitad
-                    num_from_second = random.randint(1, min(len(second_half),
-                                                            4))  # cantidad de cartas que se sacarán de la segunda mitad
+                    num_from_second = random.randint(
+                        1, min(len(second_half), 4)
+                    )  # cantidad de cartas que se sacarán de la segunda mitad
                     for _ in range(num_from_second):  # por cada carta que se sacará
                         if second_half:  # si hay cartas en la segunda mitad
                             self.deck.append(
-                                second_half.pop(0))  # saca la carta de la segunda mitad y la añade a la baraja
+                                second_half.pop(0)
+                            )  # saca la carta de la segunda mitad y la añade a la baraja
 
     def posicionate(self):  # Método que posiciona las cartas en los grupos de 4 cartas
         counter = 0  # contador para saber en qué grupo de 4 cartas se está
         for i in range(len(self.deck)):  # recorre la baraja
-            self.arrays_mini[counter].append(self.deck[i])  # añade la carta al grupo de 4 cartas correspondiente
+            self.arrays_mini[counter].append(
+                self.deck[i]
+            )  # añade la carta al grupo de 4 cartas correspondiente
             counter += 1  # aumenta el contador
             if counter == 13:  # si el contador llega a 13
                 counter = 0  # reinicia el contador
@@ -145,24 +163,34 @@ class croupier:
     def card_game(self):
         aux_end = 0  # Contador para verificar si todos los grupos están completos
         act_array = 12  # Empezamos en el último grupo (13 - 1)
-        control = [0 for _ in range(13)]  # Control para saber cuántas cartas tiene cada grupo
+        control = [
+            0 for _ in range(13)
+        ]  # Control para saber cuántas cartas tiene cada grupo
 
         while True:
             # Verifica si ya no hay cartas en el grupo actual
             if not self.arrays_mini[act_array]:
-                print(f"El grupo {act_array} está vacío. No hay más cartas para mover. ¡Has perdido!")
+                print(
+                    f"El grupo {act_array} está vacío. No hay más cartas para mover. ¡Has perdido!"
+                )
                 break
 
             # Obtén la carta actual del grupo activo
-            act_card = self.arrays_mini[act_array].pop(0)  # Tomamos la carta de la cabeza del grupo actual
-            print(f"Carta actual: {act_card.toString()}")  # Imprime la carta que estamos jugando
+            act_card = self.arrays_mini[act_array].pop(
+                0
+            )  # Tomamos la carta de la cabeza del grupo actual
+            print(
+                f"Carta actual: {act_card.toString()}"
+            )  # Imprime la carta que estamos jugando
 
             # Calcula el índice del siguiente grupo
             next_array = act_card.value - 1
 
             # Verifica si el grupo de destino ya está lleno (4 cartas)
             if control[next_array] == 4:
-                print(f"El grupo {next_array} ya está completo. ¡No puedes mover más cartas! ¡Has perdido!")
+                print(
+                    f"El grupo {next_array} ya está completo. ¡No puedes mover más cartas! ¡Has perdido!"
+                )
                 break
 
             # Mueve la carta al grupo correspondiente
@@ -183,7 +211,11 @@ class croupier:
             act_array = next_array
 
             # Verifica si ya no hay cartas en ningún grupo excepto en el activo
-            if all(len(group) == 0 for i, group in enumerate(self.arrays_mini) if i != act_array):
+            if all(
+                len(group) == 0
+                for i, group in enumerate(self.arrays_mini)
+                if i != act_array
+            ):
                 print("No hay más cartas disponibles en otros grupos. ¡Has perdido!")
                 mostrar_mensaje("¡Game Over!", ANCHO // 2 - 150, ALTO // 2, ROJO)
 
@@ -244,8 +276,12 @@ def mostrar_menu_inicial():
         titulo = fuente.render("Solitario Reloj", True, BLANCO)
         pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
 
-        boton_manual = dibujar_boton("Jugar Manual", ancho // 2 - 150, alto // 2 - 50, 300, 50, AZUL, BLANCO)
-        boton_auto = dibujar_boton("Jugar Automático", ancho // 2 - 150, alto // 2 + 50, 300, 50, VERDE, BLANCO)
+        boton_manual = dibujar_boton(
+            "Jugar Manual", ancho // 2 - 150, alto // 2 - 50, 300, 50, AZUL, BLANCO
+        )
+        boton_auto = dibujar_boton(
+            "Jugar Automático", ancho // 2 - 150, alto // 2 + 50, 300, 50, VERDE, BLANCO
+        )
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -268,12 +304,20 @@ def mostrar_mensaje(texto, x, y, color=BLANCO):
 def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
     pygame.draw.rect(pantalla, color, (x, y, ancho, alto))
     mensaje = fuente_botones.render(texto, True, color_texto)
-    pantalla.blit(mensaje, (x + (ancho - mensaje.get_width()) // 2, y + (alto - mensaje.get_height()) // 2))
+    pantalla.blit(
+        mensaje,
+        (
+            x + (ancho - mensaje.get_width()) // 2,
+            y + (alto - mensaje.get_height()) // 2,
+        ),
+    )
     return pygame.Rect(x, y, ancho, alto)
 
 
 def juego_automatico(dealer):
     time.sleep(0.5)
+    global grupos_completos
+    grupos_completos = [False] * 13  # Inicializamos el estado de los grupos
 
     # Comenzamos siempre desde el mazo actual
     if not hasattr(juego_automatico, "mazo_actual"):
@@ -282,9 +326,8 @@ def juego_automatico(dealer):
     while True:  # Bucle para continuar moviendo mientras sea posible
         mazo_actual = juego_automatico.mazo_actual
 
-        # Verificamos si hay cartas en el mazo actual y si la primera no está volteada
-        if (not grupos_completos[mazo_actual]):
-
+        # Verificamos si hay cartas en el mazo actual y si el grupo no está completo
+        if not grupos_completos[mazo_actual] and dealer.arrays_mini[mazo_actual]:
             # Tomamos la carta del mazo actual
             carta = dealer.arrays_mini[mazo_actual][0]
             destino = carta.value - 1  # Calculamos el destino basado en el valor de la carta
@@ -312,17 +355,62 @@ def juego_automatico(dealer):
                 if dealer.arrays_mini[mazo_actual]:
                     dealer.arrays_mini[destino][0].frente()
 
+                # Comprobamos si el grupo de destino se ha completado
                 dealer.comprobar_grupos(destino)
 
                 # Actualizamos el mazo actual para que sea el mazo destino
                 juego_automatico.mazo_actual = destino
+
+        # Verificamos si el grupo 12 está completo o si todos los grupos lo están
+        if grupos_completos[12]:
+            perder = True
+            if all(grupos_completos):
+                perder = False
+
+            if perder:
+                mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2, ROJO)
+            else:
+                mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
+            boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50, VERDE, BLANCO)
+            boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO, BLANCO)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if boton_reiniciar.collidepoint(event.pos):
+                        dealer = croupier()
+                        dealer.init_deck()
+                        dealer.shuffle()
+                        dealer.posicionate()
+                        grupos_completos = [False] * 13
+                        perder = False
+                    if boton_salir.collidepoint(event.pos):
+                        pygame.quit()
+                        sys.exit()
+            pygame.display.flip()
+            break  # Salimos del bucle si se reinicia o se cierra el juego
 
 
 # Función principal del juego
 def main():
     global grupos_completos
     mode = mostrar_menu_inicial()
-    grupos_completos = [False, False, False, False, False, False, False, False, False, False, False, False, False]
+    grupos_completos = [
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+    ]
     dealer = croupier()
     dealer.init_deck()
     dealer.shuffle()
@@ -356,12 +444,14 @@ def main():
                     sys.exit()
             if MousePressed == True:
                 for ite in range(13):
-                    if (pos[0] >= (posiciones[ite][0]) and
-                            pos[0] <= (posiciones[ite][0] + 71) and
-                            pos[1] >= (posiciones[ite][1]) and
-                            pos[1] <= (posiciones[ite][1] + 96) and
-                            dealer.arrays_mini[ite][0].volteada == False and
-                            grupos_completos[ite] == False):
+                    if (
+                        pos[0] >= (posiciones[ite][0])
+                        and pos[0] <= (posiciones[ite][0] + 71)
+                        and pos[1] >= (posiciones[ite][1])
+                        and pos[1] <= (posiciones[ite][1] + 96)
+                        and dealer.arrays_mini[ite][0].volteada == False
+                        and grupos_completos[ite] == False
+                    ):
                         Target = dealer.arrays_mini[ite][0]
                         dealer.arrays_mini[ite].remove(Target)
                         temp_pos = ite
@@ -375,11 +465,13 @@ def main():
                 pantalla.blit(Target.carta_imagen, (pos[0] - 20, pos[1] - 20))
             if MouseReleased and cought is True:
                 for ite in range(13):
-                    if (pos[0] >= (posiciones[ite][0]) and
-                            pos[0] <= (posiciones[ite][0] + 71) and
-                            pos[1] >= (posiciones[ite][1]) and
-                            pos[1] <= (posiciones[ite][1] + 96) and
-                            Target.value - 1 == ite):
+                    if (
+                        pos[0] >= (posiciones[ite][0])
+                        and pos[0] <= (posiciones[ite][0] + 71)
+                        and pos[1] >= (posiciones[ite][1])
+                        and pos[1] <= (posiciones[ite][1] + 96)
+                        and Target.value - 1 == ite
+                    ):
                         dealer.arrays_mini[ite].append(Target)
                         print(f"Carta movida a grupo {ite}")
                         dealer.arrays_mini[ite][0].frente()
@@ -389,18 +481,37 @@ def main():
                         if (grupos_completos[ite] == True) and (ite != 12):
                             i = ite
                             while dealer.arrays_mini[i][0].volteada is False:
-                                if i >= 11: i = i - 12
+                                if i >= 11:
+                                    i = i - 12
                                 dealer.arrays_mini[i + 1][0].frente()
                                 i = i + 1
-                        elif (all(grupos_completos) == True):
+                        elif all(grupos_completos) == True:
                             perder == False
                             while perder == False:
-                                mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2, VERDE)
-                                boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50,
-                                                                VERDE,
-                                                                BLANCO)
-                                boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
-                                                            BLANCO)
+                                mostrar_mensaje(
+                                    "¡Felicidades, has ganado!",
+                                    ANCHO // 2 - 150,
+                                    ALTO // 2,
+                                    VERDE,
+                                )
+                                boton_reiniciar = dibujar_boton(
+                                    "Reiniciar",
+                                    ANCHO // 2 - 150,
+                                    ALTO // 2,
+                                    200,
+                                    50,
+                                    VERDE,
+                                    BLANCO,
+                                )
+                                boton_salir = dibujar_boton(
+                                    "Salir",
+                                    ANCHO // 2 - 150,
+                                    ALTO // 2 + 70,
+                                    200,
+                                    50,
+                                    ROJO,
+                                    BLANCO,
+                                )
                                 for event in pygame.event.get():
                                     if event.type == pygame.QUIT:
                                         pygame.quit()
@@ -411,9 +522,21 @@ def main():
                                             dealer.init_deck()
                                             dealer.shuffle()
                                             dealer.posicionate()
-                                            grupos_completos = [False, False, False, False, False, False, False, False,
-                                                                False,
-                                                                False, False, False, False]
+                                            grupos_completos = [
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                            ]
                                             perder = False
                                         if boton_salir.collidepoint(event.pos):
                                             pygame.quit()
@@ -422,12 +545,30 @@ def main():
                         elif (grupos_completos[ite] == True) and (ite == 12):
                             perder = True
                             while perder == True:
-                                mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2, ROJO)
-                                boton_reiniciar = dibujar_boton("Reiniciar", ANCHO // 2 - 150, ALTO // 2, 200, 50,
-                                                                VERDE,
-                                                                BLANCO)
-                                boton_salir = dibujar_boton("Salir", ANCHO // 2 - 150, ALTO // 2 + 70, 200, 50, ROJO,
-                                                            BLANCO)
+                                mostrar_mensaje(
+                                    "Has perdido el juego!",
+                                    ANCHO // 2 - 150,
+                                    ALTO // 2,
+                                    ROJO,
+                                )
+                                boton_reiniciar = dibujar_boton(
+                                    "Reiniciar",
+                                    ANCHO // 2 - 150,
+                                    ALTO // 2,
+                                    200,
+                                    50,
+                                    VERDE,
+                                    BLANCO,
+                                )
+                                boton_salir = dibujar_boton(
+                                    "Salir",
+                                    ANCHO // 2 - 150,
+                                    ALTO // 2 + 70,
+                                    200,
+                                    50,
+                                    ROJO,
+                                    BLANCO,
+                                )
                                 for event in pygame.event.get():
                                     if event.type == pygame.QUIT:
                                         pygame.quit()
@@ -438,9 +579,21 @@ def main():
                                             dealer.init_deck()
                                             dealer.shuffle()
                                             dealer.posicionate()
-                                            grupos_completos = [False, False, False, False, False, False, False, False,
-                                                                False,
-                                                                False, False, False, False]
+                                            grupos_completos = [
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                                False,
+                                            ]
                                             perder = False
                                         if boton_salir.collidepoint(event.pos):
                                             pygame.quit()
@@ -462,6 +615,7 @@ def main():
         MouseReleased = False
         pygame.display.flip()
         clock.tick(60)
+
 
 if __name__ == "__main__":
     main()
