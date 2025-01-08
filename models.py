@@ -56,15 +56,22 @@ class card:
     # Color rosa claro en hexadecimal
     colors = [0x8E7F48, 0xC5E5EA, 0x7F7F7F, 0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
     backfaces = ["calaca", "geom", "greek", "maya", "rara", "sheng", "magic", "uno", "poke", "yugi"]
-    sele = 9
-    TINT_COLOR = colors[sele]  # Color de tinte para las cartas, agregar para las ultimas 4 cartas
+    TINT_COLOR = colors[0]  # Color de tinte para las cartas, agregar para las ultimas 4 cartas
 
     def __init__(self, type, value):
         self.type = type
         self.value = value
         self.volteada = True
         self.set_backface()
+        self.set_color()
 
+    def set_color(self):
+        if GLOBAL_BACKFACE_INDEX < 0 or GLOBAL_BACKFACE_INDEX >= len(self.colors):
+            # Usar color por defecto si el índice no es válido
+            self.TINT_COLOR = 0x8E7F48
+        else:
+            # Usar el color seleccionado
+            self.TINT_COLOR = self.colors[GLOBAL_BACKFACE_INDEX]
     def set_backface(self):
         if GLOBAL_BACKFACE_INDEX < 0 or GLOBAL_BACKFACE_INDEX >= len(self.backfaces):
             # Usar diseño por defecto si el índice no es válido
@@ -326,7 +333,7 @@ def dibujar_cartas(wid, hei, hour, dealer, coords):
 
             # Actualiza la pantalla y espera un momento
             pygame.display.flip()
-            time.sleep(0.00001)
+            time.sleep(0.0001)
 
         # Agrega la carta a la lista de cartas colocadas
         cartas_colocadas.append((carta, (end_x, end_y)))
