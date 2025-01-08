@@ -301,6 +301,40 @@ class croupier:
                 if aux == 4:
                     grupos_completos[ite] = True
 
+class ColorPicker:
+    def __init__(self, x, y, w, h):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.image = pygame.Surface((w, h), pygame.SRCALPHA)  # Superficie con canal alfa
+        self.image.fill((0, 0, 0, 150))  # Fondo transparente opaco (negro con alfa 150)
+        self.rad = h // 2
+        self.pwidth = w - self.rad * 2
+
+        # Generar el espectro de colores
+        for i in range(self.pwidth):
+            color = pygame.Color(0)
+            hue = int(360 * i / self.pwidth)  # Cálculo correcto para el espectro
+            color.hsla = (hue, 100, 50, 100)
+            pygame.draw.rect(self.image, color, (i + self.rad, h // 3, 1, h - 2 * h // 3))
+        
+        self.p = 0
+
+    def get_color(self):
+        color = pygame.Color(0)
+        hue = int(self.p * 360)  # Mantén la correspondencia con el rango 360°
+        color.hsla = (hue, 100, 50, 100)
+        return color
+
+    def update(self):
+        moude_buttons = pygame.mouse.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+        if moude_buttons[0] and self.rect.collidepoint(mouse_pos):
+            self.p = (mouse_pos[0] - self.rect.left - self.rad) / self.pwidth
+            self.p = max(0, min(self.p, 1))
+
+    def draw(self, surf):
+        surf.blit(self.image, self.rect)
+        center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
+        pygame.draw.circle(surf, self.get_color(), center, self.rect.height // 3)  # Tamaño de la bolita ajustado
 
 """METODOS UI"""
 
@@ -535,8 +569,17 @@ def mostrar_mensaje(texto, x, y, color=BLANCO):
     pantalla.blit(mensaje, (x, y))
 
 
-def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
-    pygame.draw.rect(pantalla, color, (x, y, ancho, alto))
+def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None, transparente=False):
+    if transparente:
+        # Crear una superficie transparente para el botón
+        superficie = pygame.Surface((ancho, alto), pygame.SRCALPHA)
+        superficie.fill((0, 0, 0, 150))  # Fondo negro con transparencia
+        pantalla.blit(superficie, (x, y))  # Dibujar la superficie en la pantalla
+    else:
+        # Dibujar un rectángulo sólido si no es transparente
+        pygame.draw.rect(pantalla, color, (x, y, ancho, alto))
+
+    # Agregar el texto al botón
     mensaje = fuente.render(texto, True, color_texto)
     pantalla.blit(
         mensaje,
@@ -545,7 +588,10 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
             y + (alto - mensaje.get_height()) // 2,
         ),
     )
+
+    # Retornar el rectángulo del botón
     return pygame.Rect(x, y, ancho, alto)
+
 
 
 """METODOS JUEGO"""
@@ -565,6 +611,8 @@ def tablero(dealer):
     for i in range(13):
         dibujar_grupos(posiciones[i][0], posiciones[i][1], i, dealer)
     pygame.display.flip()
+
+cp = ColorPicker(ancho // 2 + 25, alto // 2 + 150, 175, 50) #creo la instancia del color, (x, y, alto, ancho)
 
 
 def mostrar_menu_inicial():
@@ -586,25 +634,28 @@ def mostrar_menu_inicial():
         pantalla.blit(titulo_rojo, (x_pos - 5, y_pos + 5))  # Abajo-izquierda
         pantalla.blit(titulo_rojo, (x_pos + 5, y_pos + 5)) # Abajo-derecha
         pantalla.blit(titulo_blanco, (x_pos, y_pos))
+        
 
         boton_manual = dibujar_boton(
-            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, AMARILLO, BLANCO
+            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, AMARILLO, BLANCO, False
         )
+        
         boton_auto = dibujar_boton(
-            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, CELESTE, BLANCO
+            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, CELESTE, BLANCO, False
         )
         boton_dorsal_superior = dibujar_boton(
-            "<<", ancho // 2 - 180, alto // 2 + 150, 50, 50, GRIS, BLANCO
+            "<<", ancho // 2 - 180, alto // 2 + 150, 50, 50, GRIS, BLANCO, transparente=True
         )
         boton_dorsal_inferior = dibujar_boton(
-            ">>", ancho // 2 - 50, alto // 2 + 150, 50, 50, GRIS, BLANCO
+            ">>", ancho // 2 - 50, alto // 2 + 150, 50, 50, GRIS, BLANCO, transparente=True
         )
-        boton_color_superior = dibujar_boton(
-            "<<", ancho // 2 + 25, alto // 2 + 150, 50, 50, GRIS, BLANCO
-        )
-        boton_color_inferior = dibujar_boton(
-            ">>", ancho // 2 + 155, alto // 2 + 150, 50, 50, GRIS, BLANCO
-        )
+
+
+
+        cp.update()
+
+       
+        cp.draw(pantalla)
 
         # Dibujar la dorsal seleccionada
         dorsal_actual = backfaces[GLOBAL_BACKFACE_INDEX]
@@ -614,6 +665,11 @@ def mostrar_menu_inicial():
         pantalla.blit(sombra_rect, (ancho // 2 - 127, alto // 2 + 132)) 
         pantalla.blit(back_image, (ancho // 2 - 125, alto // 2 + 130))  # Ajusta posición y tamaño según sea necesario
         nombre_dorsal = fuente_texto.render(f"{dorsal_actual.upper()}", True, BLANCO)
+        nombre_dorsal2 = fuente_texto.render(f"{dorsal_actual.upper()}", True, ROJO)
+        pantalla.blit(nombre_dorsal2, (ancho // 2 - 130 +1, alto // 2 + 225-1))
+        pantalla.blit(nombre_dorsal2, (ancho // 2 - 130 -1, alto // 2 + 225+1))
+        pantalla.blit(nombre_dorsal2, (ancho // 2 - 130 +1, alto // 2 + 225-1))
+        pantalla.blit(nombre_dorsal2, (ancho // 2 - 130 -1, alto // 2 + 225+1))
         pantalla.blit(nombre_dorsal, (ancho // 2 - 130, alto // 2 + 225))
 
         # Manejo de eventos
@@ -727,7 +783,7 @@ def juego_automatico(dealer):
                     dealer.arrays_mini[destino][0].frente()
 
                 # Comprobamos si el grupo de destino se ha completado
-                dealer.comprobar_grupos(destino)
+                dealer.comprobar_grupos()
 
                 # Actualizamos el mazo actual para que sea el mazo destino
                 juego_automatico.mazo_actual = destino
