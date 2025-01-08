@@ -359,7 +359,7 @@ def animacion_barajado(dealer, initial_coords):
     # Coordenadas para los grupos de cartas
     global centro_x, altura_y
     global cartas_centro, cartas_muestra
-    centro_x = ancho // 2
+    centro_x = ancho // 2 - 40
     grupo_izq_x = centro_x - 200
     grupo_der_x = centro_x + 200
     altura_y = initial_coords[1]  # Mantener la misma altura para todos los grupos
@@ -799,7 +799,7 @@ def main():
     global cartas_centro
     global grupos_completos
     global GLOBAL_BACKFACE_INDEX
-    coords = [ancho // 2 - 180, alto // 2 + 150]
+    coords = [ancho // 2, alto // 2 + 250]
     mode = mostrar_menu_inicial()
     grupos_completos = [False] * 13
     dealer = croupier()
@@ -891,6 +891,8 @@ def main():
                         Target = None
                         temp_pos = None
         else:
+            while barajando:
+                barajando = animacion_barajado(dealer, coords)
             while repartiendo:
                 repartiendo = tablero_animacion(dealer, coords)
             tablero(dealer)
