@@ -280,31 +280,51 @@ class croupier:
                 print(card.toString())  # imprime la carta
         print("")
 
-    def comprobar_grupos(self, ite):
-        aux = 0;
-        if ite != 12:
-            if len(self.arrays_mini[ite]) == 4:
-                for carta in self.arrays_mini[ite]:
-                    if carta.volteada == True:
+    def comprobar_grupos(self):
+        for ite, grupo in enumerate(self.arrays_mini):
+            aux = 0
+            if ite != 12:
+                # Verificar si el grupo tiene exactamente 4 cartas y todas están volteadas
+                if len(grupo) == 4:
+                    for carta in grupo:
+                        if carta.volteada:
+                            break
+                    else:
+                        grupos_completos[ite] = True
+            else:
+                # Verificar las condiciones especiales para el grupo 12
+                for carta in grupo:
+                    if carta.volteada:
                         break
-                else:
+                    if carta.value == 13:
+                        aux += 1
+                if aux == 4:
                     grupos_completos[ite] = True
-        else:
-            for carta in self.arrays_mini[ite]:
-                if carta.volteada == True:
-                    break
-                if carta.value == 13:
-                    aux += 1
-            if aux == 4:
-                grupos_completos[ite] = True
 
 
 """METODOS UI"""
 
 
+def dibujar_cartas_centro(dealer, initial_coords, repartir=False):
+    global centro_x, altura_y, cartas_centro, cartas_muestra, pantalla, background_image
+    # Redibujar el fondo
+
+    # Reducir el montón si se están repartiendo cartas
+    if repartir and len(cartas_centro) > 0:
+        cartas_centro.pop()  # Elimina la última carta del montón central
+
+    # Dibujar todas las cartas restantes en el grupo central
+    offset_centro = 0
+    for _ in range(len(cartas_centro) - 3):
+        sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+        sombra_rect.fill((0, 0, 0, 100))  # Sombra con transparencia
+        pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+        pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
+        offset_centro -= 1.5  # Espaciado entre las cartas
 def animacion_barajado(dealer, initial_coords):
     # Coordenadas para los grupos de cartas
     global centro_x, altura_y
+    global cartas_centro, cartas_muestra
     centro_x = ancho // 2
     grupo_izq_x = centro_x - 200
     grupo_der_x = centro_x + 200
@@ -446,6 +466,9 @@ def dibujar_cartas(wid, hei, hour, dealer, coords):
         current_x = start_x
         current_y = start_y
 
+        # Antes de animar cada carta, actualiza el montón central
+        dibujar_cartas_centro(dealer, coords)
+
         # Animación de la carta desde coords hasta (end_x, end_y)
         steps = 30  # Número de pasos en la animación
         for step in range(steps):
@@ -473,7 +496,8 @@ def dibujar_cartas(wid, hei, hour, dealer, coords):
             # Dibuja la carta en movimiento
             pantalla.blit(carta.carta_imagen, (current_x, current_y))
 
-            # Actualiza la pantalla y espera un momento
+            # Actualiza la pantalla
+            dibujar_cartas_centro(dealer, coords)  # Redibuja el montón central durante la animación
             pygame.display.flip()
             time.sleep(0.00001)
 
@@ -487,6 +511,7 @@ def dibujar_cartas(wid, hei, hour, dealer, coords):
 
         # Actualiza el desplazamiento para la siguiente carta
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
+
 
 
 def dibujar_grupos(wid, hei, hour, dealer):
@@ -530,6 +555,7 @@ def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
 def tablero_animacion(dealer, coords):
     for i in range(13):
         dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer, coords)
+        dibujar_cartas_centro(dealer, coords, repartir=True)
         if i == 12:  # Último grupo
             return False
     pygame.display.flip()
@@ -714,6 +740,7 @@ def juego_automatico(dealer):
 
 # Función principal del juego
 def main():
+    global cartas_centro
     global grupos_completos
     global GLOBAL_BACKFACE_INDEX
     coords = [ancho // 2 - 180, alto // 2 + 150]
@@ -769,7 +796,7 @@ def main():
                         dealer.arrays_mini[ite].remove(Target)
                         temp_pos = ite
                         cought = True
-                        dealer.comprobar_grupos(ite)
+                        dealer.comprobar_grupos()
                         print(f"Carta seleccionada: {Target.value}")
                         break
                 else:
@@ -790,7 +817,7 @@ def main():
                         dealer.arrays_mini[ite][0].frente()
                         temp_pos = None
                         Target = None
-                        dealer.comprobar_grupos(ite)
+                        dealer.comprobar_grupos()
                         if (grupos_completos[ite] == True) and (ite != 12):
                             i = ite
                             while dealer.arrays_mini[i][0].volteada is False:
