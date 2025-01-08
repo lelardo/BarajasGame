@@ -2,7 +2,6 @@ import random
 import pygame
 import sys
 import time
-from pygame.locals import *
 
 # Inicializa pygame
 pygame.init()
@@ -12,19 +11,16 @@ tamanio = ancho, alto = 1024, 768
 
 # Inicializa la fuente
 pygame.font.init()
-fuente = pygame.font.SysFont("monospace", 15)
 pantalla = pygame.display.set_mode(tamanio)
 clock = pygame.time.Clock()
 pygame.display.set_caption("Solitario Reloj")
 halved = pygame.image.load("deck/b2pr.gif")
 halved_rect = halved.get_rect()
 negro = 0, 0, 0
-background_image = pygame.image.load("deck/background.jpg")  # Cambia por tu imagen
-background_image = pygame.transform.scale(background_image, (ancho, alto))
+fondos = ["default", "default", "calaca", "romboide", "griego", "maya", "futuro", "chino", "magic", "uno", "poke", "yugi"]
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
 ROJO = (255, 0, 0)
-AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
 GRIS = (100, 100, 100)
 FONDO_COLOR = (50, 50, 50)
@@ -54,13 +50,13 @@ posiciones = [
     (ancho / 2 - 325, alto / 2 - 200),
     (ancho / 2 - 50, alto / 2 - 75),
 ]
-
+patron = random.randint(0, 2)
 
 # Clase que representa una carta de la baraja
 class card:
     # Color rosa claro en hexadecimal
-    colors = [0XFFFFFF, 0x8E7F48, 0xC5E5EA, 0x7F7F7F, 0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
-    backfaces = ["Tradicional", "Calaca", "Geométrico", "Griego", "Maya", "Futuro", "Dragón Chino", "Magic the Gathering", "Uno", "Pokémon", "Yu-Gi-Oh"]
+    colors = [0XFFFFFF, 0XFFFFFF, 0x8E7F48, 0xC5E5EA, 0x7F7F7F, 0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
+    backfaces = ["Incoloro","Tradicional", "Calaca", "Geométrico", "Griego", "Maya", "Futuro", "Dragón Chino", "Magic the Gathering", "Uno", "Pokémon", "Yu-Gi-Oh"]
     TINT_COLOR = colors[0]  # Color de tinte para las cartas, agregar para las ultimas 4 cartas
 
     def __init__(self, type, value):
@@ -78,14 +74,60 @@ class card:
             # Usar el color seleccionado
             self.TINT_COLOR = self.colors[GLOBAL_BACKFACE_INDEX]
     def set_backface(self):
-        if GLOBAL_BACKFACE_INDEX < 0 or GLOBAL_BACKFACE_INDEX >= len(self.backfaces):
-            # Usar diseño por defecto si el índice no es válido
-            self.carta_imagen = pygame.image.load("deck/b2fv.gif").convert()
+        global backface_name
+        backface_name = self.backfaces[GLOBAL_BACKFACE_INDEX]
+        if GLOBAL_BACKFACE_INDEX == 0:
+            self.carta_imagen = self._load_and_tint_blank("deck/backfaces/Incoloro.png", patron)
         else:
-            # Cargar la cara trasera seleccionada
-            global backface_name
-            backface_name = self.backfaces[GLOBAL_BACKFACE_INDEX]
             self.carta_imagen = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
+
+    def _load_and_tint_blank(self, image_path, patron):
+        """
+        Carga una imagen y la tinta con un patrón aleatorio y un color seleccionado dinámicamente.
+
+        Args:
+            image_path (str): Ruta de la imagen a cargar.
+
+        Returns:
+            pygame.Surface: Imagen tintada.
+        """
+
+        # Patrones predefinidos
+        def stripe_pattern(x, y, color):
+            """Patrón de rayas horizontales."""
+            return y % 10 < 5
+
+        def checkerboard_pattern(x, y, color):
+            """Patrón de tablero de ajedrez."""
+            return (x // 10 + y // 10) % 2 == 0
+
+        def diagonal_stripes(x, y, color):
+            """Patrón de rayas diagonales."""
+            return (x + y) % 20 < 10
+
+        # Lista de patrones
+        patterns = [stripe_pattern, checkerboard_pattern, diagonal_stripes]
+
+        # Seleccionamos un patrón aleatorio
+        pattern_func = patterns[patron]  # Seleccionamos el patrón basado en el índice
+
+        # Seleccionamos un color aleatorio
+        rgb = cp.get_color()
+        r = rgb.r
+        g = rgb.g
+        b = rgb.b
+
+        # Carga la imagen y la convierte al formato correcto
+        original = pygame.image.load(image_path).convert()
+        tinted = original.copy()
+
+        # Aplicamos el tinte según el patrón seleccionado
+        for x in range(tinted.get_width()):
+            for y in range(tinted.get_height()):
+                color = tinted.get_at((x, y))
+                if pattern_func(x, y, color):
+                    tinted.set_at((x, y), (r, g, b))
+        return tinted
 
     def _load_and_tint(self, image_path):
         # Convertimos el hexadecimal a RGB
@@ -151,7 +193,7 @@ class croupier:
             self.spadesDeck.append(card("spades", i))  # crea las cartas de picas
 
     def init_deck(self):
-        self.deck = []  # vacia la baraja porsiacaso
+        self.deck = []  # Dacia la baraja porsiacaso
         types = [
             self.heartsDeck,
             self.diamonDeck,
@@ -315,7 +357,7 @@ class ColorPicker:
             hue = int(360 * i / self.pwidth)  # Cálculo correcto para el espectro
             color.hsla = (hue, 100, 50, 100)
             pygame.draw.rect(self.image, color, (i + self.rad, h // 3, 1, h - 2 * h // 3))
-        
+
         self.p = 0
 
     def get_color(self):
@@ -363,17 +405,20 @@ def animacion_barajado(dealer, initial_coords):
     grupo_izq_x = centro_x - 200
     grupo_der_x = centro_x + 200
     altura_y = initial_coords[1]  # Mantener la misma altura para todos los grupos
-    
+
     # Cargar algunas cartas para la animación
     cartas_muestra = []
     for i in range(4):
-        carta = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
+        if GLOBAL_BACKFACE_INDEX == 0:
+            carta = dealer.heartsDeck[0]._load_and_tint_blank("deck/backfaces/Incoloro.png", patron).convert()
+        else:
+            carta = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
         cartas_muestra.append(carta)
-    
+
     # Animación de división en dos grupos
     for step in range(30):
         pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
-        
+
         # Calcular posiciones para cada carta (manteniendo la misma altura)
         pos_izq_1 = (
             initial_coords[0] + (grupo_izq_x - initial_coords[0]) * (step / 30),
@@ -383,26 +428,26 @@ def animacion_barajado(dealer, initial_coords):
             initial_coords[0] + (grupo_der_x - initial_coords[0]) * (step / 30),
             altura_y
         )
-        
+
         # Dibujar sombras y cartas
         for pos in [pos_izq_1, pos_der_1]:
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
             pantalla.blit(sombra_rect, (pos[0] - 2, pos[1] + 2))
             pantalla.blit(cartas_muestra[0], pos)
-        
+
         pygame.display.flip()
         time.sleep(0.01)
-    
+
     # Lista para mantener un registro de las cartas en el grupo central
     cartas_centro = []
-    
+
     # Animación de mezcla al centro
-    for _ in range(8):  # 4 iteraciones de mezcla
+    for _ in range(9):  # 4 iteraciones de mezcla
         # Mover carta del grupo izquierdo al centro
         for step in range(30):
             pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
-            
+
             # Dibujar las cartas que ya están en el centro
             offset_centro = 0
             for carta_pos in cartas_centro:
@@ -411,7 +456,7 @@ def animacion_barajado(dealer, initial_coords):
                 pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
                 pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
                 offset_centro -= 1.5
-            
+
             # Mantener cartas estáticas en sus grupos
             for i in range(1):
                 sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
@@ -420,24 +465,24 @@ def animacion_barajado(dealer, initial_coords):
                 pantalla.blit(cartas_muestra[0], (grupo_izq_x, altura_y + i * 20))
                 pantalla.blit(sombra_rect, (grupo_der_x - 2, altura_y + 2 + i * 20))
                 pantalla.blit(cartas_muestra[0], (grupo_der_x, altura_y + i * 20))
-            
+
             # Animar carta en movimiento
             pos_x = grupo_izq_x + (centro_x - grupo_izq_x) * (step / 30)
-            
+
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
             pantalla.blit(sombra_rect, (pos_x - 2, altura_y + 2))
             pantalla.blit(cartas_muestra[0], (pos_x, altura_y))
-            
+
             pygame.display.flip()
             time.sleep(0.01)
-            
+
         cartas_centro.append((centro_x, altura_y))
-        
+
         # Mover carta del grupo derecho al centro
         for step in range(30):
             pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
-            
+
             # Dibujar las cartas que ya están en el centro
             offset_centro = 0
             for carta_pos in cartas_centro:
@@ -446,7 +491,7 @@ def animacion_barajado(dealer, initial_coords):
                 pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
                 pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
                 offset_centro -= 1.5
-            
+
             # Mantener cartas estáticas en sus grupos
             for i in range(1):
                 sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
@@ -455,21 +500,46 @@ def animacion_barajado(dealer, initial_coords):
                 pantalla.blit(cartas_muestra[0], (grupo_izq_x, altura_y + i * 20))
                 pantalla.blit(sombra_rect, (grupo_der_x - 2, altura_y + 2 + i * 20))
                 pantalla.blit(cartas_muestra[0], (grupo_der_x, altura_y + i * 20))
-            
+
             # Animar carta en movimiento
             pos_x = grupo_der_x + (centro_x - grupo_der_x) * (step / 30)
-            
+
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
             pantalla.blit(sombra_rect, (pos_x - 2, altura_y + 2))
             pantalla.blit(cartas_muestra[0], (pos_x, altura_y))
-            
+
             pygame.display.flip()
             time.sleep(0.01)
-            
+
         cartas_centro.append((centro_x, altura_y))
 
+    dibujar_cartas_centro(dealer, initial_coords, repartir=True)
+    for step in range(30):
+        pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
+        dibujar_cartas_centro(dealer, initial_coords)
+        # Calcular posiciones para cada carta en movimiento inverso
+        pos_izq_1 = (
+            grupo_izq_x + (initial_coords[0] - grupo_izq_x) * (step / 30),
+            altura_y
+        )
+        pos_der_1 = (
+            grupo_der_x + (initial_coords[0] - grupo_der_x) * (step / 30),
+            altura_y
+        )
+
+        # Dibujar sombras y cartas
+        for pos in [pos_izq_1, pos_der_1]:
+            sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()),
+                                         pygame.SRCALPHA)
+            sombra_rect.fill((0, 0, 0, 100))
+            pantalla.blit(sombra_rect, (pos[0] - 2, pos[1] + 2))
+            pantalla.blit(cartas_muestra[0], pos)
+
+        pygame.display.flip()
+        time.sleep(0.01)
     # Mostrar el mazo final por un momento sin que desaparezca
+
     for _ in range(20):
         pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
         offset_centro = 0
@@ -481,8 +551,16 @@ def animacion_barajado(dealer, initial_coords):
             offset_centro -= 1.5
         pygame.display.flip()
         time.sleep(0.02)
-    
+
     return False
+
+def establecer_fondo():
+    global background_image
+    if GLOBAL_BACKFACE_INDEX <= 1:
+        background_image = pygame.image.load("deck/background/default.jpg")
+    else:
+        background_image = pygame.image.load(f"deck/background/{fondos[GLOBAL_BACKFACE_INDEX]}.jpeg")
+    background_image = pygame.transform.scale(background_image, (ancho, alto))
 
 def dibujar_cartas(wid, hei, hour, dealer, coords):
     offset = 0  # Desplazamiento inicial para apilar las cartas
@@ -603,6 +681,7 @@ def tablero_animacion(dealer, coords):
         dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer, coords)
         dibujar_cartas_centro(dealer, coords, repartir=True)
         if i == 12:  # Último grupo
+            tablero(dealer)  # Dibuja el tablero final
             return False
     pygame.display.flip()
 
@@ -634,12 +713,12 @@ def mostrar_menu_inicial():
         pantalla.blit(titulo_rojo, (x_pos - 5, y_pos + 5))  # Abajo-izquierda
         pantalla.blit(titulo_rojo, (x_pos + 5, y_pos + 5)) # Abajo-derecha
         pantalla.blit(titulo_blanco, (x_pos, y_pos))
-        
+
 
         boton_manual = dibujar_boton(
             "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, AMARILLO, BLANCO, False
         )
-        
+
         boton_auto = dibujar_boton(
             "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, CELESTE, BLANCO, False
         )
@@ -654,7 +733,6 @@ def mostrar_menu_inicial():
 
         cp.update()
 
-       
         cp.draw(pantalla)
 
         # Dibujar la dorsal seleccionada
@@ -662,7 +740,7 @@ def mostrar_menu_inicial():
         back_image = pygame.image.load(f"deck/backfaces/{dorsal_actual}.png").convert()
         sombra_rect = pygame.Surface((back_image.get_width(), back_image.get_height()), pygame.SRCALPHA)
         sombra_rect.fill((0, 0, 0, 100))  # Negro semitransparente
-        pantalla.blit(sombra_rect, (ancho // 2 - 127, alto // 2 + 132)) 
+        pantalla.blit(sombra_rect, (ancho // 2 - 127, alto // 2 + 132))
         pantalla.blit(back_image, (ancho // 2 - 125, alto // 2 + 130))  # Ajusta posición y tamaño según sea necesario
         nombre_dorsal = fuente_texto.render(f"{dorsal_actual.upper()}", True, BLANCO)
         nombre_dorsal2 = fuente_texto.render(f"{dorsal_actual.upper()}", True, ROJO)
@@ -796,9 +874,10 @@ def juego_automatico(dealer):
 
 # Función principal del juego
 def main():
-    global cartas_centro
+    global cartas_centro, temp_pos
     global grupos_completos
     global GLOBAL_BACKFACE_INDEX
+    global background_image
     coords = [ancho // 2, alto // 2 + 250]
     mode = mostrar_menu_inicial()
     grupos_completos = [False] * 13
@@ -819,6 +898,7 @@ def main():
         print(numero.toString())
     repartiendo = True
     barajando = True
+    establecer_fondo()
     while True:
         pantalla.blit(background_image, (0, 0))
         pos = pygame.mouse.get_pos()
@@ -826,7 +906,6 @@ def main():
             barajando = animacion_barajado(dealer, coords)
         while repartiendo:
             repartiendo = tablero_animacion(dealer, coords)
-        tablero(dealer)
         if mode == "manual":
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -840,6 +919,7 @@ def main():
                     sys.exit()
             if MousePressed == True:
                 for ite in range(13):
+                    dealer.comprobar_grupos()
                     if (
                             pos[0] >= (posiciones[ite][0])
                             and pos[0] <= (posiciones[ite][0] + 96)
@@ -859,6 +939,7 @@ def main():
                     cought = False
             if MouseDown and Target is not None and cought is True:
                 pantalla.blit(Target.carta_imagen, (pos[0] - 20, pos[1] - 20))
+                tablero(dealer)
             if MouseReleased and cought is True:
                 for ite in range(13):
                     if (
@@ -883,6 +964,7 @@ def main():
                                 i = i + 1
                         if grupos_completos[12] == True:
                             perder = True
+                            tablero(dealer)
                             endgame(perder, grupos_completos)
                 else:
                     if temp_pos is not None:
@@ -895,10 +977,10 @@ def main():
                 barajando = animacion_barajado(dealer, coords)
             while repartiendo:
                 repartiendo = tablero_animacion(dealer, coords)
-            tablero(dealer)
             juego_automatico(dealer)
             print("Juego automático")
 
+        tablero(dealer)
         MousePressed = False
         MouseReleased = False
         pygame.display.flip()
