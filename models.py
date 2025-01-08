@@ -35,7 +35,7 @@ AMARILLO = (233, 146, 5)
 VERDESITO = (71, 169, 120)
 fuente = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 50)
 fuente_botones = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 40)
-fuente_titulo = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 100)
+fuente_titulo = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 200)
 fuente_texto = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 20)
 ANCHO, ALTO = 800, 600
 # Define las posiciones de las cartas en la pantalla
@@ -545,13 +545,22 @@ def mostrar_menu_inicial():
     backfaces = card.backfaces
     global GLOBAL_BACKFACE_INDEX
     GLOBAL_BACKFACE_INDEX = 0
+    menu_img = pygame.image.load("deck/menu.png")  # Cambia por tu imagen
+    menu_img = pygame.transform.scale(menu_img, (ancho, alto))
     while True:
-        pantalla.blit(background_image, (0, 0))
+        pantalla.blit(menu_img, (0, 0))
 
-        # Título centrado con una fuente bonita
-        titulo = fuente_titulo.render("Solitario Reloj", True, BLANCO)
-        pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
-        # Botones centrados
+        titulo_blanco = fuente_titulo.render("Oráculo", True, BLANCO)
+        titulo_rojo = fuente_titulo.render("Oráculo", True, ROJO)
+        x_pos = ancho // 2 - titulo_blanco.get_width() // 2
+        y_pos = alto // 6
+
+        pantalla.blit(titulo_rojo, (x_pos - 5, y_pos - 5))  # Arriba-izquierda
+        pantalla.blit(titulo_rojo, (x_pos + 5, y_pos - 5))  # Arriba-derecha
+        pantalla.blit(titulo_rojo, (x_pos - 5, y_pos + 5))  # Abajo-izquierda
+        pantalla.blit(titulo_rojo, (x_pos + 5, y_pos + 5)) # Abajo-derecha
+        pantalla.blit(titulo_blanco, (x_pos, y_pos))
+
         boton_manual = dibujar_boton(
             "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, AMARILLO, BLANCO
         )
