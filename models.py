@@ -28,10 +28,15 @@ AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
 GRIS = (100, 100, 100)
 FONDO_COLOR = (50, 50, 50)
-fuente = pygame.font.Font(None, 74)
-fuente_botones = pygame.font.SysFont("comicsansms", 40, bold=True)
-fuente_titulo = pygame.font.SysFont("comicsansms", 70, bold=True)
-fuente_texto = pygame.font.SysFont("comicsansms", 20, bold=True)
+AZUL = (0, 0, 255)
+ROJIZO = (228, 55, 61)
+CELESTE = (10, 148, 237)
+AMARILLO = (233, 146, 5)
+VERDESITO = (71, 169, 120)
+fuente = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 50)
+fuente_botones = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 40)
+fuente_titulo = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 100)
+fuente_texto = pygame.font.Font("deck/fonts/StepalangeShort-p7GZd.otf", 20)
 ANCHO, ALTO = 800, 600
 # Define las posiciones de las cartas en la pantalla
 posiciones = [
@@ -377,7 +382,7 @@ def mostrar_mensaje(texto, x, y, color=BLANCO):
 
 def dibujar_boton(texto, x, y, ancho, alto, color, color_texto, accion=None):
     pygame.draw.rect(pantalla, color, (x, y, ancho, alto))
-    mensaje = fuente_botones.render(texto, True, color_texto)
+    mensaje = fuente.render(texto, True, color_texto)
     pantalla.blit(
         mensaje,
         (
@@ -418,10 +423,10 @@ def mostrar_menu_inicial():
         pantalla.blit(titulo, (ancho // 2 - titulo.get_width() // 2, alto // 4))
         # Botones centrados
         boton_manual = dibujar_boton(
-            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, GRIS, BLANCO
+            "Jugar Manual", ancho // 2 - 200, alto // 2 - 50, 400, 60, AMARILLO, BLANCO
         )
         boton_auto = dibujar_boton(
-            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, GRIS, BLANCO
+            "Jugar Automático", ancho // 2 - 200, alto // 2 + 50, 400, 60, CELESTE, BLANCO
         )
         boton_dorsal_superior = dibujar_boton(
             "<<", ancho // 2 - 180, alto // 2 + 150, 50, 50, GRIS, BLANCO
@@ -486,10 +491,10 @@ def endgame(perder, grupos_completos):
 
         # Dibujar botones sobre el rectángulo gris
         boton_reiniciar = dibujar_boton(
-            "Reiniciar", ancho // 2 - 150, alto // 2 - 100, 300, 50, VERDE, BLANCO
+            "Reiniciar", ancho // 2 - 150, alto // 2 - 100, 300, 50, VERDESITO, BLANCO
         )
         boton_salir = dibujar_boton(
-            "Salir", ancho // 2 - 150, alto // 2, 300, 50, ROJO, BLANCO
+            "Salir", ancho // 2 - 150, alto // 2, 300, 50, ROJIZO, BLANCO
         )
 
         for event in pygame.event.get():
