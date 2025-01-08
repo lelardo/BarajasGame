@@ -83,6 +83,7 @@ class card:
             self.carta_imagen = pygame.image.load("deck/b2fv.gif").convert()
         else:
             # Cargar la cara trasera seleccionada
+            global backface_name
             backface_name = self.backfaces[GLOBAL_BACKFACE_INDEX]
             self.carta_imagen = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
 
@@ -301,12 +302,140 @@ class croupier:
 """METODOS UI"""
 
 
+def animacion_barajado(dealer, initial_coords):
+    # Coordenadas para los grupos de cartas
+    global centro_x, altura_y
+    centro_x = ancho // 2
+    grupo_izq_x = centro_x - 200
+    grupo_der_x = centro_x + 200
+    altura_y = initial_coords[1]  # Mantener la misma altura para todos los grupos
+    
+    # Cargar algunas cartas para la animación
+    cartas_muestra = []
+    for i in range(4):
+        carta = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
+        cartas_muestra.append(carta)
+    
+    # Animación de división en dos grupos
+    for step in range(30):
+        pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
+        
+        # Calcular posiciones para cada carta (manteniendo la misma altura)
+        pos_izq_1 = (
+            initial_coords[0] + (grupo_izq_x - initial_coords[0]) * (step / 30),
+            altura_y
+        )
+        pos_der_1 = (
+            initial_coords[0] + (grupo_der_x - initial_coords[0]) * (step / 30),
+            altura_y
+        )
+        
+        # Dibujar sombras y cartas
+        for pos in [pos_izq_1, pos_der_1]:
+            sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+            sombra_rect.fill((0, 0, 0, 100))
+            pantalla.blit(sombra_rect, (pos[0] - 2, pos[1] + 2))
+            pantalla.blit(cartas_muestra[0], pos)
+        
+        pygame.display.flip()
+        time.sleep(0.01)
+    
+    # Lista para mantener un registro de las cartas en el grupo central
+    cartas_centro = []
+    
+    # Animación de mezcla al centro
+    for _ in range(8):  # 4 iteraciones de mezcla
+        # Mover carta del grupo izquierdo al centro
+        for step in range(30):
+            pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
+            
+            # Dibujar las cartas que ya están en el centro
+            offset_centro = 0
+            for carta_pos in cartas_centro:
+                sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+                sombra_rect.fill((0, 0, 0, 100))
+                pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+                pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
+                offset_centro -= 1.5
+            
+            # Mantener cartas estáticas en sus grupos
+            for i in range(1):
+                sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+                sombra_rect.fill((0, 0, 0, 100))
+                pantalla.blit(sombra_rect, (grupo_izq_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(cartas_muestra[0], (grupo_izq_x, altura_y + i * 20))
+                pantalla.blit(sombra_rect, (grupo_der_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(cartas_muestra[0], (grupo_der_x, altura_y + i * 20))
+            
+            # Animar carta en movimiento
+            pos_x = grupo_izq_x + (centro_x - grupo_izq_x) * (step / 30)
+            
+            sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+            sombra_rect.fill((0, 0, 0, 100))
+            pantalla.blit(sombra_rect, (pos_x - 2, altura_y + 2))
+            pantalla.blit(cartas_muestra[0], (pos_x, altura_y))
+            
+            pygame.display.flip()
+            time.sleep(0.01)
+            
+        cartas_centro.append((centro_x, altura_y))
+        
+        # Mover carta del grupo derecho al centro
+        for step in range(30):
+            pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
+            
+            # Dibujar las cartas que ya están en el centro
+            offset_centro = 0
+            for carta_pos in cartas_centro:
+                sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+                sombra_rect.fill((0, 0, 0, 100))
+                pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+                pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
+                offset_centro -= 1.5
+            
+            # Mantener cartas estáticas en sus grupos
+            for i in range(1):
+                sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+                sombra_rect.fill((0, 0, 0, 100))
+                pantalla.blit(sombra_rect, (grupo_izq_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(cartas_muestra[0], (grupo_izq_x, altura_y + i * 20))
+                pantalla.blit(sombra_rect, (grupo_der_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(cartas_muestra[0], (grupo_der_x, altura_y + i * 20))
+            
+            # Animar carta en movimiento
+            pos_x = grupo_der_x + (centro_x - grupo_der_x) * (step / 30)
+            
+            sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+            sombra_rect.fill((0, 0, 0, 100))
+            pantalla.blit(sombra_rect, (pos_x - 2, altura_y + 2))
+            pantalla.blit(cartas_muestra[0], (pos_x, altura_y))
+            
+            pygame.display.flip()
+            time.sleep(0.01)
+            
+        cartas_centro.append((centro_x, altura_y))
+
+    # Mostrar el mazo final por un momento sin que desaparezca
+    for _ in range(20):
+        pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
+        offset_centro = 0
+        for _ in range(len(cartas_centro)):
+            sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
+            sombra_rect.fill((0, 0, 0, 100))
+            pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+            pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
+            offset_centro -= 1.5
+        pygame.display.flip()
+        time.sleep(0.02)
+    
+    return False
+
 def dibujar_cartas(wid, hei, hour, dealer, coords):
     offset = 0  # Desplazamiento inicial para apilar las cartas
     aux = reversed(dealer.arrays_mini[hour])
 
     # Coordenadas iniciales
-    start_x, start_y = coords
+    start_x, start_y = centro_x, altura_y
 
     cartas_colocadas = []  # Registro de cartas ya colocadas con sus sombras
 
@@ -374,6 +503,7 @@ def dibujar_grupos(wid, hei, hour, dealer):
         # Dibuja la carta
         pantalla.blit(carta.carta_imagen, (wid - offset, hei))
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
+
 
 def mostrar_mensaje(texto, x, y, color=BLANCO):
     mensaje = fuente.render(texto, True, color)
@@ -596,9 +726,12 @@ def main():
     for numero in dealer.arrays_mini[12]:
         print(numero.toString())
     repartiendo = True
+    barajando = True
     while True:
         pantalla.blit(background_image, (0, 0))
         pos = pygame.mouse.get_pos()
+        while barajando:
+            barajando = animacion_barajado(dealer, coords)
         while repartiendo:
             repartiendo = tablero_animacion(dealer, coords)
         tablero(dealer)
