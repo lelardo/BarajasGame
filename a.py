@@ -51,27 +51,20 @@ posiciones = [
 ]
 
 
-# Clase que representa una carta de la baraja
+sele = 0
 class card:
-    # Color rosa claro en hexadecimal
-    colors = [0XFFFFFF, 0x8E7F48, 0xC5E5EA, 0x7F7F7F, 0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
-    backfaces = ["Tradicional", "Calaca", "Geométrico", "Griego", "Maya", "Futuro", "Dragón Chino", "Magic the Gathering", "Uno", "Pokémon", "Yu-Gi-Oh"]
-    TINT_COLOR = colors[0]  # Color de tinte para las cartas, agregar para las ultimas 4 cartas
+   
+    colors = [0x8E7F48, 0xC5E5EA, 0x7F7F7F, 0xAE9C88, 0x919192, 0xFFFFFE, 0xD56F44, 0xE2E2E1, 0xD5D5E8, 0xFAC78E]
+    backfaces = ["calaca", "geom", "greek", "maya", "rara", "sheng", "magic", "uno", "poke", "yugi"]
+    
+    TINT_COLOR = colors[sele]  # Color de tinte para las cartas, agregar para las ultimas 4 cartas
 
     def __init__(self, type, value):
         self.type = type
         self.value = value
         self.volteada = True
         self.set_backface()
-        self.set_color()
 
-    def set_color(self):
-        if GLOBAL_BACKFACE_INDEX < 0 or GLOBAL_BACKFACE_INDEX >= len(self.colors):
-            # Usar color por defecto si el índice no es válido
-            self.TINT_COLOR = 0x8E7F48
-        else:
-            # Usar el color seleccionado
-            self.TINT_COLOR = self.colors[GLOBAL_BACKFACE_INDEX]
     def set_backface(self):
         if GLOBAL_BACKFACE_INDEX < 0 or GLOBAL_BACKFACE_INDEX >= len(self.backfaces):
             # Usar diseño por defecto si el índice no es válido
@@ -370,6 +363,7 @@ def dibujar_grupos(wid, hei, hour, dealer):
         pantalla.blit(carta.carta_imagen, (wid - offset, hei))
         offset -= 12  # Incrementa el desplazamiento horizontal para apilar las cartas
 
+
 def mostrar_mensaje(texto, x, y, color=BLANCO):
     mensaje = fuente.render(texto, True, color)
     pantalla.blit(mensaje, (x, y))
@@ -438,10 +432,8 @@ def mostrar_menu_inicial():
 
         # Dibujar la dorsal seleccionada
         dorsal_actual = backfaces[GLOBAL_BACKFACE_INDEX]
+        sele = GLOBAL_BACKFACE_INDEX
         back_image = pygame.image.load(f"deck/backfaces/{dorsal_actual}.png").convert()
-        sombra_rect = pygame.Surface((back_image.get_width(), back_image.get_height()), pygame.SRCALPHA)
-        sombra_rect.fill((0, 0, 0, 100))  # Negro semitransparente
-        pantalla.blit(sombra_rect, (ancho // 2 - 127, alto // 2 + 132)) 
         pantalla.blit(back_image, (ancho // 2 - 125, alto // 2 + 130))  # Ajusta posición y tamaño según sea necesario
         nombre_dorsal = fuente_texto.render(f"{dorsal_actual.upper()}", True, BLANCO)
         pantalla.blit(nombre_dorsal, (ancho // 2 - 130, alto // 2 + 225))
