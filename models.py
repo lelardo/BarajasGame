@@ -759,10 +759,9 @@ class InputBox:
             mensaje_guardado = self.fuente.render("¡Deseo guardado!", True, (0, 255, 0))  # Color verde para indicar éxito
             pantalla.blit(mensaje_guardado, (self.rect.x, self.rect.y + self.rect.height + 10))
  # Variable para almacenar el deseo del usuario
-def set_deseo(self, deseo):
+def set_deseo(deseo = ""):
     global cumplira
     cumplira = deseo
-    print(f"Deseo ingresado: {cumplira}")
 
 def get_deseo():
     return cumplira
@@ -773,7 +772,7 @@ def mostrar_menu_inicial():
     GLOBAL_BACKFACE_INDEX = 0
     menu_img = pygame.image.load("deck/menu.png")  # Cambia por tu imagen
     menu_img = pygame.transform.scale(menu_img, (ancho, alto))
-    input_box = InputBox(ancho // 2 - 200, alto // 2 + 230, 400, 40)
+    input_box = InputBox(ancho // 2 - 200, alto // 2 + 250, 400, 40)
     while True:
         pantalla.blit(menu_img, (0, 0))
 
@@ -820,9 +819,10 @@ def mostrar_menu_inicial():
         pantalla.blit(nombre_dorsal2, (ancho // 2 - 130 +1, alto // 2 + 225-1))
         pantalla.blit(nombre_dorsal2, (ancho // 2 - 130 -1, alto // 2 + 225+1))
         pantalla.blit(nombre_dorsal, (ancho // 2 - 130, alto // 2 + 225))
-
         # Manejo de eventos
         for event in pygame.event.get():
+            input_box.handle_event(event)
+            texto = input_box.texto
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -833,22 +833,23 @@ def mostrar_menu_inicial():
             ############################################################################################################
             ############################################################################################################
             ############################################################################################################
-            texto = input_box.handle_event(event)
-            if texto:  # Si se presionó Enter y hay texto, se guarda
-                set_deseo(texto)
-            else:
-                set_deseo("")
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_dorsal_superior.collidepoint(event.pos):
                     GLOBAL_BACKFACE_INDEX = (GLOBAL_BACKFACE_INDEX - 1) % len(backfaces)
-                    print(f"Dorsal seleccionada: {backfaces[GLOBAL_BACKFACE_INDEX]}")
+
                 if boton_dorsal_inferior.collidepoint(event.pos):
                     GLOBAL_BACKFACE_INDEX = (GLOBAL_BACKFACE_INDEX + 1) % len(backfaces)
-                    print(f"Dorsal seleccionada: {backfaces[GLOBAL_BACKFACE_INDEX]}")
                 if boton_manual.collidepoint(event.pos):
+                    if texto is not None:  # Si se presionó Enter y hay texto, se guarda
+                        set_deseo(texto)
+                    else:
+                        set_deseo()
                     return "manual"
                 if boton_auto.collidepoint(event.pos):
+                    if texto is not None:  # Si se presionó Enter y hay texto, se guarda
+                        set_deseo(texto)
+                    else:
+                        set_deseo()
                     return "auto"
         #Pone el textfiel, capaazz hacerlo aca abajo tiene algo que ver
         input_box.draw(pantalla)
@@ -861,10 +862,10 @@ def endgame(perder, grupos_completos):
         perder = False
     while casa == False:
         # Dibujar fondo gris
-        rect_x = ANCHO // 2 - 200
+        rect_x = ANCHO // 2 - 300
         rect_y = ALTO // 2 - 150
-        rect_ancho = 600
-        rect_alto = 300
+        rect_ancho = 800
+        rect_alto = 500
         pygame.draw.rect(pantalla, (169, 169, 169), (rect_x, rect_y, rect_ancho, rect_alto))  # Gris claro
         pygame.draw.rect(pantalla, (0, 0, 0), (rect_x, rect_y, rect_ancho, rect_alto), 3)  # Bordes negros
 
@@ -879,17 +880,17 @@ def endgame(perder, grupos_completos):
         ##################
         ######################
         if perder:
-            mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2 - 100, ROJO)
+            mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 75, ALTO // 2 - 100, ROJO)
             if get_deseo == "":
-                mostrar_mensaje("Lamento que tu deseo, no se cumplira", ANCHO // 2 - 300, ALTO // 2 - 200, ROJO)
+                mostrar_mensaje("Tu deseo, no se cumplira", ANCHO // 2 - 300, ALTO // 2 + 200, ROJO)
             else:
-                mostrar_mensaje("Lamento que tu deseo, "+get_deseo+", no se cumplira", ANCHO // 2 - 300, ALTO // 2 - 200, ROJO)
+                mostrar_mensaje(get_deseo()+", no se cumplira", ANCHO // 2 - 250, ALTO // 2 + 200, ROJO)
         else:
             mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2 - 100, VERDE)
             if get_deseo == "":
-                mostrar_mensaje("Eres afortunado, tu deseo se va a cumplir", ANCHO // 2 - 150, ALTO // 2 - 200, VERDE)
+                mostrar_mensaje("Tu deseo se va a cumplir", ANCHO // 2 - 200, ALTO // 2 + 200, VERDE)
             else:
-                mostrar_mensaje("Eres afortunado, tu deseo "+get_deseo+" se cumplira", ANCHO // 2 - 150, ALTO // 2 - 200, VERDE)
+                mostrar_mensaje(get_deseo()+" se cumplira", ANCHO // 2 - 250, ALTO // 2 + 200, VERDE)
         # Dibujar botones sobre el rectángulo gris
         boton_reiniciar = dibujar_boton(
             "Reiniciar", ancho // 2 - 150, alto // 2 - 100, 300, 50, VERDESITO, BLANCO
@@ -904,7 +905,6 @@ def endgame(perder, grupos_completos):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_reiniciar.collidepoint(event.pos):
-                    print("Tocaste el boton de reinicio")
                     main()
                     dealer = croupier()
                     dealer.init_deck()
@@ -993,11 +993,6 @@ def main():
     MouseReleased = False
     Target = None
     cought = False
-    print(posiciones[0])
-    print(len(posiciones))
-    print(len(dealer.arrays_mini))
-    for numero in dealer.arrays_mini[12]:
-        print(numero.toString())
     repartiendo = True
     barajando = True
     establecer_fondo()
@@ -1036,7 +1031,6 @@ def main():
                         temp_pos = ite
                         cought = True
                         dealer.comprobar_grupos()
-                        print(f"Carta seleccionada: {Target.value}")
                         break
                 else:
                     cought = False
@@ -1052,7 +1046,6 @@ def main():
                             and Target.value - 1 == ite
                     ):
                         dealer.arrays_mini[ite].append(Target)
-                        print(f"Carta movida a grupo {ite}")
                         dealer.arrays_mini[ite][0].frente()
                         temp_pos = None
                         Target = None
@@ -1079,7 +1072,6 @@ def main():
             while repartiendo:
                 repartiendo = tablero_animacion(dealer, coords)
             juego_automatico(dealer)
-            print("Juego automático")
 
         MousePressed = False
         MouseReleased = False
