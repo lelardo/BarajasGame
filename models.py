@@ -378,6 +378,26 @@ class ColorPicker:
         center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
         pygame.draw.circle(surf, self.get_color(), center, self.rect.height // 3)  # Tamaño de la bolita ajustado
 
+class GestorSonidos:
+    def __init__(self):
+        pygame.mixer.pre_init(48000, -16, 1, 1024)  # Configuración previa
+        pygame.mixer.init()
+        self.sonidos = {
+            "mover": pygame.mixer.Sound("sounds/ponerla.ogg"),
+            "poner": pygame.mixer.Sound("sounds/moverla.ogg")
+        }
+        # Ajustar volumen de los sonidos
+        self.sonidos["poner"].set_volume(0.8)
+        self.sonidos["mover"].set_volume(0.8)
+
+    def reproducir(self, nombre):
+        if nombre in self.sonidos:
+            self.sonidos[nombre].play(fade_ms=50)  # Añadir fade-in para suavizar
+        else:
+            print(f"Sonido '{nombre}' no encontrado.")
+
+
+sound = GestorSonidos()
 """METODOS UI"""
 
 
@@ -394,9 +414,10 @@ def dibujar_cartas_centro(dealer, initial_coords, repartir=False):
     for _ in range(len(cartas_centro) - 3):
         sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
         sombra_rect.fill((0, 0, 0, 100))  # Sombra con transparencia
-        pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+        pantalla.blit(sombra_rect, (centro_x +1 + offset_centro, altura_y))
         pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
         offset_centro -= 1.5  # Espaciado entre las cartas
+        
 def animacion_barajado(dealer, initial_coords):
     # Coordenadas para los grupos de cartas
     global centro_x, altura_y
@@ -433,7 +454,7 @@ def animacion_barajado(dealer, initial_coords):
         for pos in [pos_izq_1, pos_der_1]:
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
-            pantalla.blit(sombra_rect, (pos[0] - 2, pos[1] + 2))
+            pantalla.blit(sombra_rect, (pos[0] +1, pos[1]))
             pantalla.blit(cartas_muestra[0], pos)
 
         pygame.display.flip()
@@ -443,7 +464,7 @@ def animacion_barajado(dealer, initial_coords):
     cartas_centro = []
 
     # Animación de mezcla al centro
-    for _ in range(9):  # 4 iteraciones de mezcla
+    for _ in range(8):  # 4 iteraciones de mezcla
         # Mover carta del grupo izquierdo al centro
         for step in range(30):
             pantalla.blit(background_image, (0, 0))  # Redibuja el fondo
@@ -453,7 +474,7 @@ def animacion_barajado(dealer, initial_coords):
             for carta_pos in cartas_centro:
                 sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
                 sombra_rect.fill((0, 0, 0, 100))
-                pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+                pantalla.blit(sombra_rect, (centro_x +1 + offset_centro, altura_y))
                 pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
                 offset_centro -= 1.5
 
@@ -461,9 +482,9 @@ def animacion_barajado(dealer, initial_coords):
             for i in range(1):
                 sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
                 sombra_rect.fill((0, 0, 0, 100))
-                pantalla.blit(sombra_rect, (grupo_izq_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(sombra_rect, (grupo_izq_x +1, altura_y + i * 20))
                 pantalla.blit(cartas_muestra[0], (grupo_izq_x, altura_y + i * 20))
-                pantalla.blit(sombra_rect, (grupo_der_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(sombra_rect, (grupo_der_x +1, altura_y + i * 20))
                 pantalla.blit(cartas_muestra[0], (grupo_der_x, altura_y + i * 20))
 
             # Animar carta en movimiento
@@ -471,7 +492,7 @@ def animacion_barajado(dealer, initial_coords):
 
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
-            pantalla.blit(sombra_rect, (pos_x - 2, altura_y + 2))
+            pantalla.blit(sombra_rect, (pos_x +1, altura_y ))
             pantalla.blit(cartas_muestra[0], (pos_x, altura_y))
 
             pygame.display.flip()
@@ -488,7 +509,7 @@ def animacion_barajado(dealer, initial_coords):
             for carta_pos in cartas_centro:
                 sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
                 sombra_rect.fill((0, 0, 0, 100))
-                pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+                pantalla.blit(sombra_rect, (centro_x +1 + offset_centro, altura_y))
                 pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
                 offset_centro -= 1.5
 
@@ -496,9 +517,9 @@ def animacion_barajado(dealer, initial_coords):
             for i in range(1):
                 sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
                 sombra_rect.fill((0, 0, 0, 100))
-                pantalla.blit(sombra_rect, (grupo_izq_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(sombra_rect, (grupo_izq_x + 1, altura_y + i * 20))
                 pantalla.blit(cartas_muestra[0], (grupo_izq_x, altura_y + i * 20))
-                pantalla.blit(sombra_rect, (grupo_der_x - 2, altura_y + 2 + i * 20))
+                pantalla.blit(sombra_rect, (grupo_der_x + 1, altura_y + i * 20))
                 pantalla.blit(cartas_muestra[0], (grupo_der_x, altura_y + i * 20))
 
             # Animar carta en movimiento
@@ -506,7 +527,7 @@ def animacion_barajado(dealer, initial_coords):
 
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
-            pantalla.blit(sombra_rect, (pos_x - 2, altura_y + 2))
+            pantalla.blit(sombra_rect, (pos_x +1, altura_y))
             pantalla.blit(cartas_muestra[0], (pos_x, altura_y))
 
             pygame.display.flip()
@@ -533,7 +554,7 @@ def animacion_barajado(dealer, initial_coords):
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()),
                                          pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
-            pantalla.blit(sombra_rect, (pos[0] - 2, pos[1] + 2))
+            pantalla.blit(sombra_rect, (pos[0] +1, pos[1]))
             pantalla.blit(cartas_muestra[0], pos)
 
         pygame.display.flip()
@@ -546,7 +567,7 @@ def animacion_barajado(dealer, initial_coords):
         for _ in range(len(cartas_centro)):
             sombra_rect = pygame.Surface((cartas_muestra[0].get_width(), cartas_muestra[0].get_height()), pygame.SRCALPHA)
             sombra_rect.fill((0, 0, 0, 100))
-            pantalla.blit(sombra_rect, (centro_x - 2 + offset_centro, altura_y + 2))
+            pantalla.blit(sombra_rect, (centro_x +1 + offset_centro, altura_y))
             pantalla.blit(cartas_muestra[0], (centro_x + offset_centro, altura_y))
             offset_centro -= 1.5
         pygame.display.flip()
@@ -597,7 +618,7 @@ def dibujar_cartas(wid, hei, hour, dealer, coords):
             for colocada, (x, y) in cartas_colocadas:
                 sombra_rect = pygame.Surface((colocada.carta_imagen.get_width(), colocada.carta_imagen.get_height()), pygame.SRCALPHA)
                 sombra_rect.fill((0, 0, 0, 100))  # Negro semitransparente
-                pantalla.blit(sombra_rect, (x - 2, y + 2))
+                pantalla.blit(sombra_rect, (x +1, y))
                 pantalla.blit(colocada.carta_imagen, (x, y))
 
             # Dibuja la sombra de la carta en movimiento
@@ -693,13 +714,66 @@ def tablero(dealer):
 
 cp = ColorPicker(ancho // 2 + 25, alto // 2 + 150, 175, 50) #creo la instancia del color, (x, y, alto, ancho)
 
+class InputBox:
+    def __init__(self, x, y, w, h, texto_inicial='', color_inactivo=(200, 200, 200), color_activo=(0, 128, 255), fuente=None):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color_inactivo = color_inactivo
+        self.color_activo = color_activo
+        self.color = color_inactivo
+        self.texto = texto_inicial
+        self.fuente = fuente or pygame.font.Font(None, 32)
+        self.activo = False
+        self.guardo = False  # Variable para verificar si el deseo fue guardado
 
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos) and not self.guardo:  # Solo si no está guardado
+                self.activo = True
+                self.color = self.color_activo
+            else:
+                self.activo = False
+                self.color = self.color_inactivo
+
+        if event.type == pygame.KEYDOWN:
+            if self.activo and not self.guardo:  # Solo permite escribir si no está guardado
+                if event.key == pygame.K_RETURN:
+                    self.guardo = True  # El deseo se guarda
+                    self.activo = False  # Bloquear el input
+                    return self.texto  # Retorna el texto cuando se presiona Enter
+                elif event.key == pygame.K_BACKSPACE:
+                    self.texto = self.texto[:-1]  # Borra el último carácter
+                else:
+                    self.texto += event.unicode  # Agrega el carácter al texto
+
+        return None
+
+    def draw(self, pantalla):
+        # Dibuja el rectángulo del input box
+        pygame.draw.rect(pantalla, self.color, self.rect)
+        # Dibuja el texto
+        txt_surface = self.fuente.render(self.texto, True, (0, 0, 0))
+        pantalla.blit(txt_surface, (self.rect.x + 5, self.rect.y + 5))
+        pygame.draw.rect(pantalla, (0, 0, 0), self.rect, 2)  # Borde
+
+        if self.guardo:  # Si el deseo está guardado, muestra un mensaje
+            mensaje_guardado = self.fuente.render("¡Deseo guardado!", True, (0, 255, 0))  # Color verde para indicar éxito
+            pantalla.blit(mensaje_guardado, (self.rect.x, self.rect.y + self.rect.height + 10))
+ # Variable para almacenar el deseo del usuario
+def set_deseo(self, deseo):
+    global cumplira
+    cumplira = deseo
+    print(f"Deseo ingresado: {cumplira}")
+
+def get_deseo():
+    return cumplira
+    
 def mostrar_menu_inicial():
     backfaces = card.backfaces
     global GLOBAL_BACKFACE_INDEX
     GLOBAL_BACKFACE_INDEX = 0
     menu_img = pygame.image.load("deck/menu.png")  # Cambia por tu imagen
     menu_img = pygame.transform.scale(menu_img, (ancho, alto))
+    input_box = InputBox(ancho // 2 - 200, alto // 2 + 230, 400, 40)
     while True:
         pantalla.blit(menu_img, (0, 0))
 
@@ -729,11 +803,8 @@ def mostrar_menu_inicial():
             ">>", ancho // 2 - 50, alto // 2 + 150, 50, 50, GRIS, BLANCO, transparente=True
         )
 
-
-
-        cp.update()
-
-        cp.draw(pantalla)
+        cp.update() # dibuja el colorimetro
+        cp.draw(pantalla) # dibuja el colorimetro
 
         # Dibujar la dorsal seleccionada
         dorsal_actual = backfaces[GLOBAL_BACKFACE_INDEX]
@@ -755,6 +826,19 @@ def mostrar_menu_inicial():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            #AQUI SE LEEE EL TEXTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+            ############################################################################################################
+            ############################################################################################################
+            ############################################################################################################
+            ############################################################################################################
+            ############################################################################################################
+            ############################################################################################################
+            texto = input_box.handle_event(event)
+            if texto:  # Si se presionó Enter y hay texto, se guarda
+                set_deseo(texto)
+            else:
+                set_deseo("")
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_dorsal_superior.collidepoint(event.pos):
                     GLOBAL_BACKFACE_INDEX = (GLOBAL_BACKFACE_INDEX - 1) % len(backfaces)
@@ -766,6 +850,8 @@ def mostrar_menu_inicial():
                     return "manual"
                 if boton_auto.collidepoint(event.pos):
                     return "auto"
+        #Pone el textfiel, capaazz hacerlo aca abajo tiene algo que ver
+        input_box.draw(pantalla)
         pygame.display.flip()
 
 
@@ -783,11 +869,27 @@ def endgame(perder, grupos_completos):
         pygame.draw.rect(pantalla, (0, 0, 0), (rect_x, rect_y, rect_ancho, rect_alto), 3)  # Bordes negros
 
         # Volver a mostrar el mensaje sobre el rectángulo gris
+        #aqui se lee el texto del deseo, pero no llega porque no se define bien ahisito
+        ###################
+        ####################
+        ###################
+        #################
+        ###################
+        #####################
+        ##################
+        ######################
         if perder:
             mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 150, ALTO // 2 - 100, ROJO)
+            if get_deseo == "":
+                mostrar_mensaje("Lamento que tu deseo, no se cumplira", ANCHO // 2 - 300, ALTO // 2 - 200, ROJO)
+            else:
+                mostrar_mensaje("Lamento que tu deseo, "+get_deseo+", no se cumplira", ANCHO // 2 - 300, ALTO // 2 - 200, ROJO)
         else:
             mostrar_mensaje("¡Felicidades, has ganado!", ANCHO // 2 - 150, ALTO // 2 - 100, VERDE)
-
+            if get_deseo == "":
+                mostrar_mensaje("Eres afortunado, tu deseo se va a cumplir", ANCHO // 2 - 150, ALTO // 2 - 200, VERDE)
+            else:
+                mostrar_mensaje("Eres afortunado, tu deseo "+get_deseo+" se cumplira", ANCHO // 2 - 150, ALTO // 2 - 200, VERDE)
         # Dibujar botones sobre el rectángulo gris
         boton_reiniciar = dibujar_boton(
             "Reiniciar", ancho // 2 - 150, alto // 2 - 100, 300, 50, VERDESITO, BLANCO
