@@ -48,10 +48,6 @@ Clock Solitaire is a card game implemented using Pygame. The game involves arran
 - **Card Backfaces**: Choose from various designs using the buttons in the menu.
 - **Tint Color**: Use the color picker to customize the tint color of the cards.
 
-### License
-
-This project is licensed under the MIT License.
-
 ---
 
 # Solitario Reloj
@@ -103,7 +99,3 @@ Solitario Reloj es un juego de cartas implementado usando Pygame. El juego consi
 
 - **Reversos de Cartas**: Elige entre varios diseños usando los botones en el menú.
 - **Color de Tinte**: Usa el selector de color para personalizar el color de tinte de las cartas.
-
-### Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT.
