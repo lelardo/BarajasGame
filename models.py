@@ -680,7 +680,7 @@ def tablero_animacion(dealer, coords):
     for i in range(13):
         dibujar_cartas(posiciones[i][0], posiciones[i][1], i, dealer, coords)
         dibujar_cartas_centro(dealer, coords, repartir=True)
-        if i == 12:  # Último grupo
+        if i == 13:  # Último grupo
             tablero(dealer)  # Dibuja el tablero final
             return False
     pygame.display.flip()
@@ -906,6 +906,7 @@ def main():
             barajando = animacion_barajado(dealer, coords)
         while repartiendo:
             repartiendo = tablero_animacion(dealer, coords)
+        tablero(dealer)
         if mode == "manual":
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -939,7 +940,6 @@ def main():
                     cought = False
             if MouseDown and Target is not None and cought is True:
                 pantalla.blit(Target.carta_imagen, (pos[0] - 20, pos[1] - 20))
-                tablero(dealer)
             if MouseReleased and cought is True:
                 for ite in range(13):
                     if (
@@ -964,7 +964,6 @@ def main():
                                 i = i + 1
                         if grupos_completos[12] == True:
                             perder = True
-                            tablero(dealer)
                             endgame(perder, grupos_completos)
                 else:
                     if temp_pos is not None:
@@ -980,7 +979,6 @@ def main():
             juego_automatico(dealer)
             print("Juego automático")
 
-        tablero(dealer)
         MousePressed = False
         MouseReleased = False
         pygame.display.flip()
