@@ -82,15 +82,6 @@ class card:
             self.carta_imagen = pygame.image.load(f"deck/backfaces/{backface_name}.png").convert()
 
     def _load_and_tint_blank(self, image_path, patron):
-        """
-        Carga una imagen y la tinta con un patrón aleatorio y un color seleccionado dinámicamente.
-
-        Args:
-            image_path (str): Ruta de la imagen a cargar.
-
-        Returns:
-            pygame.Surface: Imagen tintada.
-        """
 
         # Patrones predefinidos
         def stripe_pattern(x, y, color):
@@ -826,13 +817,7 @@ def mostrar_menu_inicial():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            #AQUI SE LEEE EL TEXTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-            ############################################################################################################
-            ############################################################################################################
-            ############################################################################################################
-            ############################################################################################################
-            ############################################################################################################
-            ############################################################################################################
+        
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_dorsal_superior.collidepoint(event.pos):
                     GLOBAL_BACKFACE_INDEX = (GLOBAL_BACKFACE_INDEX - 1) % len(backfaces)
@@ -870,15 +855,6 @@ def endgame(perder, grupos_completos):
         pygame.draw.rect(pantalla, (0, 0, 0), (rect_x, rect_y, rect_ancho, rect_alto), 3)  # Bordes negros
 
         # Volver a mostrar el mensaje sobre el rectángulo gris
-        #aqui se lee el texto del deseo, pero no llega porque no se define bien ahisito
-        ###################
-        ####################
-        ###################
-        #################
-        ###################
-        #####################
-        ##################
-        ######################
         if perder:
             mostrar_mensaje("Has perdido el juego!", ANCHO // 2 - 75, ALTO // 2 - 100, ROJO)
             if get_deseo == "":
